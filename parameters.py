@@ -51,10 +51,20 @@ strNeedUpdate = "Need Update"
 strUpdateNow = "update now?"
 strUninstallApp = "uninstall app"
 strConfigFilePath = "kflash_gui.conf"
-
+strSipeedMaixDock = "Sipeed Maix Dock"
+strSipeedMaixBit  = "Sipeed Maix Bit"
+strSipeedMaixGoE  = "Sipeed Maix Go(open-ec)"
+strSipeedMaixGoD  = "Sipeed Maix Go(CMSIS-DAP)"
+strKendriteKd233  = "Kendryte KD233"
+strSRAM = "SRAM"
+strFlash = "Flash"
+strBurnTo = "Burn To"
 
 class ParametersToSave:
-    baudRate = 4
+    filePath = ""
+    board    = strSipeedMaixBit
+    burnPosition = strFlash
+    baudRate = 2
     skin = 2
 
     def __init__(self):
