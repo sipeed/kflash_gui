@@ -8,7 +8,8 @@ from Combobox import ComboBox
 from PyQt5.QtCore import pyqtSignal,Qt
 from PyQt5.QtWidgets import (QApplication, QWidget,QToolTip,QPushButton,QMessageBox,QDesktopWidget,QMainWindow,
                              QVBoxLayout,QHBoxLayout,QGridLayout,QLabel,
-                             QLineEdit,QGroupBox,QSplitter,QFileDialog)
+                             QLineEdit,QGroupBox,QSplitter,QFileDialog,
+                             QProgressBar)
 from PyQt5.QtGui import QIcon,QFont,QTextCursor,QPixmap
 import serial
 import serial.tools.list_ports
@@ -32,6 +33,7 @@ class MainWindow(QMainWindow):
     errorSignal = pyqtSignal(str, str)
     updateProgressSignal = pyqtSignal(str, int, int, str)
     showSerialComboboxSignal = pyqtSignal()
+    downloadResultSignal = pyqtSignal(bool, str)
     isDetectSerialPort = False
     DataPath = "./"
     app = None
@@ -62,7 +64,7 @@ class MainWindow(QMainWindow):
         # main layout
         frameWidget = QWidget()
         mainWidget = QSplitter(Qt.Horizontal)
-        frameLayout = QVBoxLayout()
+        self.frameLayout = QVBoxLayout()
         self.settingWidget = QWidget()
         settingLayout = QVBoxLayout()
         self.settingWidget.setProperty("class","settingWidget")
@@ -71,6 +73,15 @@ class MainWindow(QMainWindow):
         mainLayout.addWidget(self.settingWidget)
         mainLayout.setStretch(0,2)
         menuLayout = QHBoxLayout()
+        
+        self.progressHint = QLabel()
+        self.progressHint.hide()
+
+        self.progressbarRootWidget = QWidget()
+        progressbarLayout = QVBoxLayout()
+        self.progressbarRootWidget.setProperty("class","progressbarWidget")
+        self.progressbarRootWidget.setLayout(progressbarLayout)
+        
         self.downloadWidget = QWidget()
         downloadLayout = QVBoxLayout()
         self.downloadWidget.setProperty("class","downloadWidget")
@@ -81,14 +92,19 @@ class MainWindow(QMainWindow):
         # -----
         # settings and others
         # -----
+        # progress bar
+        # -----
         # download button
         # -----
         # status bar
-        frameLayout.addLayout(menuLayout)
-        frameLayout.addWidget(mainWidget)
-        frameLayout.addWidget(self.downloadWidget)
-        frameWidget.setLayout(frameLayout)
+        self.frameLayout.addLayout(menuLayout)
+        self.frameLayout.addWidget(mainWidget)
+        self.frameLayout.addWidget(self.progressHint)
+        self.frameLayout.addWidget(self.progressbarRootWidget)
+        self.frameLayout.addWidget(self.downloadWidget)
+        frameWidget.setLayout(self.frameLayout)
         self.setCentralWidget(frameWidget)
+        self.setFrameStrentch(0)
 
         # option layout
         self.skinButton = QPushButton("")
@@ -160,6 +176,13 @@ class MainWindow(QMainWindow):
         settingLayout.setStretch(1,1)
         settingLayout.setStretch(2,2)
 
+        # widgets progress bar
+        
+        self.progressbar = QProgressBar(self.progressbarRootWidget)
+        self.progressbar.setGeometry(10, 0, 360, 40)
+        self.progressbar.setValue(0)
+        self.progressbarRootWidget.hide()
+
         # widgets download area
         self.downloadButton = QPushButton(parameters.strDownload)
         downloadLayout.addWidget(self.downloadButton)
@@ -185,6 +208,7 @@ class MainWindow(QMainWindow):
     def initEvent(self):
         self.serialPortCombobox.clicked.connect(self.portComboboxClicked)
         self.errorSignal.connect(self.errorHint)
+        self.downloadResultSignal.connect(self.downloadResult)
         self.showSerialComboboxSignal.connect(self.showCombobox)
         self.updateProgressSignal.connect(self.updateProgress)
         self.skinButton.clicked.connect(self.skinChange)
@@ -196,6 +220,21 @@ class MainWindow(QMainWindow):
         slotLambda = lambda: self.indexChanged_lambda(self.myObject)
         self.serialPortCombobox.currentIndexChanged.connect(slotLambda)
 
+    def setFrameStrentch(self, mode):
+        if mode == 0:
+            self.frameLayout.setStretch(0,1)
+            self.frameLayout.setStretch(1,3)
+            self.frameLayout.setStretch(2,3)
+            self.frameLayout.setStretch(3,1)
+            self.frameLayout.setStretch(4,1)
+            self.frameLayout.setStretch(5,1)
+        else:
+            self.frameLayout.setStretch(0,0)
+            self.frameLayout.setStretch(1,0)
+            self.frameLayout.setStretch(2,1)
+            self.frameLayout.setStretch(3,1)
+            self.frameLayout.setStretch(4,1)
+            self.frameLayout.setStretch(5,1)
 
     # @QtCore.pyqtSlot(str)
     def indexChanged_lambda(self, obj):
@@ -328,7 +367,11 @@ class MainWindow(QMainWindow):
         os.system('start devmgmt.msc')
 
     def updateProgress(self, fileTypeStr, current, total, speedStr):
-        self.statusBarStauts.setText("<font color=%s>downloading %s: %.2f%% %s</font>" %("#008200", fileTypeStr, current/float(total)*100, speedStr))
+        percent = current/float(total)*100
+        hint = "<font color=%s>downloading %s: %.2f%% %s</font>" %("#ff7575", fileTypeStr, percent, speedStr)
+        # self.statusBarStauts.setText(hint)
+        self.progressHint.setText(hint)
+        self.progressbar.setValue(percent)
 
     def progress(self, fileTypeStr, current, total, speedStr):
         self.updateProgressSignal.emit(fileTypeStr, current, total, speedStr)
@@ -364,23 +407,45 @@ class MainWindow(QMainWindow):
             self.errorSignal.emit("Error", "please select serial port")
             self.burning = False
             return
+        # hide setting widgets
+        self.setFrameStrentch(1)
+        self.settingWidget.hide()
+        self.progressbar.setValue(0)
+        self.progressbarRootWidget.show()
+        self.progressHint.show()
+        self.statusBarStauts.setText("<font color=%s>downloading ...</font>" %("#008200"))
+        # download
         t = threading.Thread(target=self.flashBurnProcess, args=(dev, baud, board, sram, filename, self.progress, color,))
         t.setDaemon(True)
         t.start()
 
     def flashBurnProcess(self, dev, baud, board, sram, filename, callback, color):
-        self.statusBarStauts.setText("<font color=%s>downloading start...</font>" %("#008200"))
+        success = True
+        errMsg = ""
         try:
             kflash = KFlash()
             kflash.process(terminal=False, dev=dev, baudrate=baud, board=board, sram = sram, file=filename, callback=callback, noansi=not color)
         except Exception as e:
-            self.errorSignal.emit("Burn Error", str(e))
-            self.statusBarStauts.setText("<font color=%s>download fail</font>" %("#ff1d1d"))
-            self.burning = False
-            return
-        self.statusBarStauts.setText("<font color=%s>download success</font>" %("#008200"))
-        self.burning = False
+            errMsg = str(e)
+            success = False
+        if success:
+            self.downloadResultSignal.emit(True, errMsg)
+        else:
+            self.downloadResultSignal.emit(False, errMsg)
+            
 
+    def downloadResult(self, success, msg):
+        if success:
+            self.errorSignal.emit("Success", "Burn success")
+            self.statusBarStauts.setText("<font color=%s>download success</font>" %("#008200"))
+        else:
+            self.errorSignal.emit("Error", msg)
+            self.statusBarStauts.setText("<font color=%s>download fail</font>" %("#ff1d1d"))
+        self.setFrameStrentch(0)
+        self.progressbarRootWidget.hide()
+        self.progressHint.hide()
+        self.settingWidget.show()
+        self.burning = False
 
 
 def main():

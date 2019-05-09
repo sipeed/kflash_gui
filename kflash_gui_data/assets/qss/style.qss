@@ -16,6 +16,9 @@ QWidget {
 .settingWidget {
     
 }
+.progressbarWidget{
+
+}
 .fileSelectWidget{
     
 }
@@ -110,10 +113,10 @@ QWidget {
     min-width:60px;
 }
 QComboBox {
-    border: 1px solid #abaaaa;
+    border: 1px solid #ff8585;
     border-radius: 2px;
     padding: 1px 18px 1px 3px;
-    min-height:25px;
+    min-height:35px;
 }
 
 QComboBox:editable {
@@ -140,7 +143,7 @@ QComboBox::drop-down {
     width: 18px;
 
     border-left-width: 1px;
-    border-left-color: #b9b9b9;
+    border-left-color: #ff8585;
     border-left-style: solid; /* just a single line */
     border-top-right-radius: 3px; /* same radius as the QComboBox */
     border-bottom-right-radius: 3px;
@@ -170,7 +173,7 @@ QComboBox QAbstractItemView::item{
 
 
 QGroupBox {
-    border: 1px solid #b9b9b9;
+    border: 1px solid #ffc3c3;
     border-radius: 3px;
     padding:0px;
     margin-top: 2ex; /* leave space at the top for the title */
@@ -214,13 +217,13 @@ QPushButton:default {
 
 QTextEdit, QListView {
     background-color: white;
-    border: 1px solid #abaaaa;
+    border: 1px solid #ff8585;
     border-radius: 3px;
     background-attachment: scroll;
 }
 
 QLineEdit {
-    border: 1px solid #abaaaa;
+    border: 1px solid #ff8585;
     border-radius: 5px;
     padding: 0 8px;
     background: white;
