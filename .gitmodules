@@ -1,0 +1,3 @@
+[submodule "kflash_py"]
+	path = kflash_py
+	url = https://github.com/sipeed/kflash.py.git
