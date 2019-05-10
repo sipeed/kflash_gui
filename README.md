@@ -45,6 +45,11 @@ Cross platform GUI wrapper for [kflash.py](https://github.com/sipeed/kflash.py.g
 * Check if serial occupied by other software
 * Replug in USB cable and try again
 
+## How To Pack `kfpkg`
+
+`bin` just can be downloaded to address at `0x000000` of `Flash`, you need to create your own `kfpkg` file if you need to specify an address, such as downloading a model file, and download it.
+
+Refer here: [blog.sipeed.com/p/390.html](http://blog.sipeed.com/p/390.html)
 
 ---------------------------
 
@@ -82,6 +87,12 @@ Cross platform GUI wrapper for [kflash.py](https://github.com/sipeed/kflash.py.g
 * 串口速度是否选择过高，可以适当降低速度试试
 * 串口是否被其它软件占用
 * 串口是否出了奇怪的问题，拔掉电脑连接到板子的线重新插一下试试
+
+## 如何打包 `kfpkg`
+
+`bin` 文件只能下载到 `Flash` 地址 `0x000000`, 如果需要指定地址，比如下载模型文件，则需要创建 `kfpkg` 文件然后下载
+
+参考这里: [blog.sipeed.com/p/390.html](http://blog.sipeed.com/p/390.html)
 
 
 
