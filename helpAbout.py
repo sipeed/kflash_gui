@@ -5,10 +5,10 @@ except ImportError:
     from COMTool import parameters
 import os
 
-versionMajor = 0
-versionMinor = 1
+versionMajor = 1
+versionMinor = 0
 versionDev   = 0
-date = "2019.5.09"
+date = "2019.5.10"
 
 def strAbout():
     pathDirList = sys.argv[0].replace("\\", "/").split("/")
