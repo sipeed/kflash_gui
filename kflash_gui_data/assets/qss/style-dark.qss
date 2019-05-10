@@ -95,8 +95,7 @@ QWidget {
     border-image: url("$DataPath/assets/wave-white.png")
 }
 .settingWidget QComboBox{
-    width:60px;
-    min-width:60px;
+    width:200px;
 }
 QComboBox {
     border: 1px solid #272727;
@@ -178,23 +177,67 @@ QGroupBox::title {
 
 QPushButton {
     font-family:Tahoma,Optima,"Trebuchet MS";
-    border: 1px solid #383636;
     border-radius: 5px;
-    background-color: #3a3a3a;
-    height:40px;
+    background-color: #0f88eb;
     min-width: 80px;
+    height:40px;
+    color:white;
 }
 
 QPushButton:hover {
-    background-color: #2f2e2e;
-    border: 1px solid #0f88eb;
+    background-color: #0074d4;
     border-radius: 5px;
     min-height:25px;
     color:white;
 }
 QPushButton:pressed {
-    background-color: #3a3a3a;
+    background-color: #4946ff;
+    color: white;
 }
+
+.redbutton {
+    font-family:Tahoma,Optima,"Trebuchet MS";
+    border: 1px solid #ff3232;
+    border-radius: 5px;
+    background-color: #f84747;
+    height:40px;
+    min-width: 80px;
+    color: white;
+}
+
+.redbutton:hover {
+    background-color: #ff1717;
+    border: 1px solid #ff1717;
+    border-radius: 5px;
+    min-height:25px;
+    color:white;
+}
+.redbutton:pressed {
+    background-color: #ff4d07;
+    color: white;
+}
+
+
+.normalbutton {
+    font-family:Tahoma,Optima,"Trebuchet MS";
+    border-radius: 5px;
+    background-color: #0f88eb;
+    min-width: 80px;
+    height:40px;
+    color:white;
+}
+
+.normalbutton:hover {
+    background-color: #0074d4;
+    border-radius: 5px;
+    min-height:25px;
+    color:white;
+}
+.normalbutton:pressed {
+    background-color: #4946ff;
+    color: white;
+}
+
 
 QPushButton:flat {
     border: none; /* no border for a flat push button */

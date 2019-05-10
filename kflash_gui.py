@@ -31,10 +31,10 @@ class MyClass(object):
 
 class MainWindow(QMainWindow):
     errorSignal = pyqtSignal(str, str)
+    hintSignal = pyqtSignal(str, str)
     updateProgressSignal = pyqtSignal(str, int, int, str)
     showSerialComboboxSignal = pyqtSignal()
     downloadResultSignal = pyqtSignal(bool, str)
-    isDetectSerialPort = False
     DataPath = "./"
     app = None
 
@@ -51,6 +51,7 @@ class MainWindow(QMainWindow):
 
     def initVar(self):
         self.burning = False
+        self.isDetectSerialPort = False
         pathDirList = sys.argv[0].replace("\\", "/").split("/")
         pathDirList.pop()
         self.DataPath = os.path.abspath("/".join(str(i) for i in pathDirList))
@@ -58,6 +59,7 @@ class MainWindow(QMainWindow):
             pathDirList.pop()
             self.DataPath = os.path.abspath("/".join(str(i) for i in pathDirList))
         self.DataPath = (self.DataPath + "/" + parameters.strDataDirName).replace("\\", "/")
+        self.kflash = KFlash()
 
     def initWindow(self):
         QToolTip.setFont(QFont('SansSerif', 10))
@@ -156,6 +158,7 @@ class MainWindow(QMainWindow):
         self.serialPortCombobox = ComboBox()
         self.serailBaudrateCombobox = ComboBox()
         self.serailBaudrateCombobox.addItem("115200")
+        self.serailBaudrateCombobox.addItem("921600")
         self.serailBaudrateCombobox.addItem("1500000")
         self.serailBaudrateCombobox.addItem("2000000")
         self.serailBaudrateCombobox.addItem("3500000")
@@ -190,7 +193,7 @@ class MainWindow(QMainWindow):
         # main window
         self.statusBarStauts = QLabel()
         self.statusBarStauts.setMinimumWidth(80)
-        self.statusBarStauts.setText("<font color=%s>%s</font>" %("#008200", parameters.strReady))
+        self.statusBarStauts.setText("<font color=%s>%s</font>" %("#1aac2d", parameters.strDownloadHint))
         self.statusBar().addWidget(self.statusBarStauts)
 
         self.resize(400, 550)
@@ -208,6 +211,7 @@ class MainWindow(QMainWindow):
     def initEvent(self):
         self.serialPortCombobox.clicked.connect(self.portComboboxClicked)
         self.errorSignal.connect(self.errorHint)
+        self.hintSignal.connect(self.hint)
         self.downloadResultSignal.connect(self.downloadResult)
         self.showSerialComboboxSignal.connect(self.showCombobox)
         self.updateProgressSignal.connect(self.updateProgress)
@@ -267,6 +271,9 @@ class MainWindow(QMainWindow):
         self.filePathWidget.setText(fileName_choose)
 
     def errorHint(self, title, str):
+        QMessageBox.critical(self, title, str)
+    
+    def hint(self, title, str):
         QMessageBox.information(self, title, str)
 
     def findSerialPort(self):
@@ -301,8 +308,8 @@ class MainWindow(QMainWindow):
                 currText = self.serialPortCombobox.currentText()
                 self.serialPortCombobox.clear()
                 for i in portList:
-                    showStr = str(i[0])+" "+str(i[1])
-                    self.serialPortCombobox.addItem(showStr)    
+                    showStr = str(i[0])+" ("+str(i[1])+")"
+                    self.serialPortCombobox.addItem(showStr)
                 index = self.serialPortCombobox.findText(currText)
                 if index>=0:
                     self.serialPortCombobox.setCurrentIndex(index)
@@ -367,8 +374,10 @@ class MainWindow(QMainWindow):
         os.system('start devmgmt.msc')
 
     def updateProgress(self, fileTypeStr, current, total, speedStr):
+        if self.burnPositionCombobox.currentText() == parameters.strSRAM:
+            fileTypeStr = parameters.strToSRAM
         percent = current/float(total)*100
-        hint = "<font color=%s>downloading %s: %.2f%% %s</font>" %("#ff7575", fileTypeStr, percent, speedStr)
+        hint = "<font color=%s>downloading %s:</font>   <font color=%s> %.2f%%</font>   <font color=%s> %s</font>" %("#ff7575", fileTypeStr, "#2985ff", percent, "#1aac2d", speedStr)
         # self.statusBarStauts.setText(hint)
         self.progressHint.setText(hint)
         self.progressbar.setValue(percent)
@@ -378,7 +387,9 @@ class MainWindow(QMainWindow):
 
     def download(self):
         if self.burning:
-            self.errorSignal.emit("Error", "Busy...")
+            # errMsg = parameters.strCancel
+            self.terminateBurn()
+            # self.downloadResultSignal.emit(False, errMsg)
             return
 
         self.burning = True
@@ -413,21 +424,28 @@ class MainWindow(QMainWindow):
         self.progressbar.setValue(0)
         self.progressbarRootWidget.show()
         self.progressHint.show()
-        self.statusBarStauts.setText("<font color=%s>downloading ...</font>" %("#008200"))
+        self.downloadButton.setText(parameters.strCancel)
+        self.downloadButton.setProperty("class", "redbutton")
+        self.downloadButton.style().unpolish(self.downloadButton)
+        self.downloadButton.style().polish(self.downloadButton)
+        self.downloadButton.update()
+        self.statusBarStauts.setText("<font color=%s>downloading ...</font>" %("#1aac2d"))
+        hint = "<font color=%s>%s</font>" %("#ff0d0d", parameters.strDownloadStart)
+        self.progressHint.setText(hint)
         # download
-        t = threading.Thread(target=self.flashBurnProcess, args=(dev, baud, board, sram, filename, self.progress, color,))
-        t.setDaemon(True)
-        t.start()
+        self.burnThread = threading.Thread(target=self.flashBurnProcess, args=(dev, baud, board, sram, filename, self.progress, color,))
+        self.burnThread.setDaemon(True)
+        self.burnThread.start()
 
     def flashBurnProcess(self, dev, baud, board, sram, filename, callback, color):
         success = True
         errMsg = ""
         try:
-            kflash = KFlash()
-            kflash.process(terminal=False, dev=dev, baudrate=baud, board=board, sram = sram, file=filename, callback=callback, noansi=not color)
+            self.kflash.process(terminal=False, dev=dev, baudrate=baud, board=board, sram = sram, file=filename, callback=callback, noansi=not color)
         except Exception as e:
             errMsg = str(e)
-            success = False
+            if str(e) != "Burn SRAM OK":
+                success = False
         if success:
             self.downloadResultSignal.emit(True, errMsg)
         else:
@@ -436,16 +454,31 @@ class MainWindow(QMainWindow):
 
     def downloadResult(self, success, msg):
         if success:
-            self.errorSignal.emit("Success", "Burn success")
-            self.statusBarStauts.setText("<font color=%s>download success</font>" %("#008200"))
+            self.hintSignal.emit("Success", "Burn success")
+            self.statusBarStauts.setText("<font color=%s>%s</font>" %("#1aac2d", parameters.strDownloadSuccess))
         else:
-            self.errorSignal.emit("Error", msg)
-            self.statusBarStauts.setText("<font color=%s>download fail</font>" %("#ff1d1d"))
+            if msg == "Cancel":
+                self.statusBarStauts.setText("<font color=%s>%s</font>" %("#ff1d1d", parameters.strDownloadCanceled))
+            else:
+                msg = parameters.strErrorSettingHint + "\n\n"+msg
+                self.errorSignal.emit("Error", msg)
+                self.statusBarStauts.setText("<font color=%s>%s</font>" %("#ff1d1d", parameters.strDownloadFail))
+            self.progressHint.setText("")
+        self.downloadButton.setText(parameters.strDownload)
+        self.downloadButton.setProperty("class", "normalbutton")
+        self.downloadButton.style().unpolish(self.downloadButton)
+        self.downloadButton.style().polish(self.downloadButton)
+        self.downloadButton.update()
         self.setFrameStrentch(0)
         self.progressbarRootWidget.hide()
         self.progressHint.hide()
         self.settingWidget.show()
         self.burning = False
+
+    def terminateBurn(self):
+        hint = "<font color=%s>%s</font>" %("#ff0d0d", parameters.strDownloadCanceling)
+        self.progressHint.setText(hint)
+        self.kflash.kill()
 
 
 def main():
