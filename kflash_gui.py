@@ -1,7 +1,9 @@
 
 
 import sys,os
-import parameters,helpAbout,autoUpdate
+import parameters, helpAbout, autoUpdate, paremeters_save
+import translation
+from translation import tr, tr_en
 from Combobox import ComboBox
 
 # from COMTool.wave import Wave
@@ -33,6 +35,7 @@ class MainWindow(QMainWindow):
     errorSignal = pyqtSignal(str, str)
     hintSignal = pyqtSignal(str, str)
     updateProgressSignal = pyqtSignal(str, int, int, str)
+    updateProgressPrintSignal = pyqtSignal(str)
     showSerialComboboxSignal = pyqtSignal()
     downloadResultSignal = pyqtSignal(bool, str)
     DataPath = "./"
@@ -41,10 +44,11 @@ class MainWindow(QMainWindow):
     def __init__(self,app):
         super().__init__()
         self.app = app
+        self.programStartGetSavedParameters()
         self.initVar()
         self.initWindow()
+        self.updateFrameParams()
         self.initEvent()
-        self.programStartGetSavedParameters()
 
     def __del__(self):
         pass
@@ -52,19 +56,13 @@ class MainWindow(QMainWindow):
     def initVar(self):
         self.burning = False
         self.isDetectSerialPort = False
-        pathDirList = sys.argv[0].replace("\\", "/").split("/")
-        pathDirList.pop()
-        self.DataPath = os.path.abspath("/".join(str(i) for i in pathDirList))
-        if not os.path.exists(self.DataPath + "/" + parameters.strDataDirName):
-            pathDirList.pop()
-            self.DataPath = os.path.abspath("/".join(str(i) for i in pathDirList))
-        self.DataPath = (self.DataPath + "/" + parameters.strDataDirName).replace("\\", "/")
-        self.kflash = KFlash()
+        self.DataPath = parameters.dataPath
+        self.kflash = KFlash(print_callback=self.kflash_py_printCallback)
 
     def initWindow(self):
         QToolTip.setFont(QFont('SansSerif', 10))
         # main layout
-        frameWidget = QWidget()
+        self.frameWidget = QWidget()
         mainWidget = QSplitter(Qt.Horizontal)
         self.frameLayout = QVBoxLayout()
         self.settingWidget = QWidget()
@@ -104,57 +102,61 @@ class MainWindow(QMainWindow):
         self.frameLayout.addWidget(self.progressHint)
         self.frameLayout.addWidget(self.progressbarRootWidget)
         self.frameLayout.addWidget(self.downloadWidget)
-        frameWidget.setLayout(self.frameLayout)
-        self.setCentralWidget(frameWidget)
+        self.frameWidget.setLayout(self.frameLayout)
+        self.setCentralWidget(self.frameWidget)
         self.setFrameStrentch(0)
 
         # option layout
-        self.skinButton = QPushButton("")
+        self.langButton = QPushButton()
+        self.skinButton = QPushButton()
         self.aboutButton = QPushButton()
+        self.langButton.setProperty("class", "menuItemLang")
         self.skinButton.setProperty("class", "menuItem2")
         self.aboutButton.setProperty("class", "menuItem3")
+        self.langButton.setObjectName("menuItem")
         self.skinButton.setObjectName("menuItem")
         self.aboutButton.setObjectName("menuItem")
+        menuLayout.addWidget(self.langButton)
         menuLayout.addWidget(self.skinButton)
         menuLayout.addWidget(self.aboutButton)
         menuLayout.addStretch(0)
         
         # widgets file select
-        fileSelectGroupBox = QGroupBox(parameters.strSelectFile)
+        fileSelectGroupBox = QGroupBox(tr("SelectFile"))
         settingLayout.addWidget(fileSelectGroupBox)
         fileSelectLayout = QHBoxLayout()
         fileSelectGroupBox.setLayout(fileSelectLayout)
         self.filePathWidget = QLineEdit()
-        self.openFileButton = QPushButton(parameters.strOpenFile)
+        self.openFileButton = QPushButton(tr("OpenFile"))
         fileSelectLayout.addWidget(self.filePathWidget)
         fileSelectLayout.addWidget(self.openFileButton)
 
         # widgets board select
-        boardSettingsGroupBox = QGroupBox(parameters.strBoardSettings)
+        boardSettingsGroupBox = QGroupBox(tr("BoardSettings"))
         settingLayout.addWidget(boardSettingsGroupBox)
         boardSettingsLayout = QGridLayout()
         boardSettingsGroupBox.setLayout(boardSettingsLayout)
-        self.boardLabel = QLabel(parameters.strBoard)
+        self.boardLabel = QLabel(tr("Board"))
         self.boardCombobox = ComboBox()
-        self.boardCombobox.addItem(parameters.strSipeedMaixDock)
-        self.boardCombobox.addItem(parameters.strSipeedMaixBit )
-        self.boardCombobox.addItem(parameters.strSipeedMaixGoE )
-        self.boardCombobox.addItem(parameters.strSipeedMaixGoD )
-        self.boardCombobox.addItem(parameters.strKendriteKd233 )
-        self.burnPositionLabel = QLabel(parameters.strBurnTo)
+        self.boardCombobox.addItem(parameters.SipeedMaixDock)
+        self.boardCombobox.addItem(parameters.SipeedMaixBit)
+        self.boardCombobox.addItem(parameters.SipeedMaixGoE)
+        self.boardCombobox.addItem(parameters.SipeedMaixGoD)
+        self.boardCombobox.addItem(parameters.KendriteKd233)
+        self.burnPositionLabel = QLabel(tr("BurnTo"))
         self.burnPositionCombobox = ComboBox()
-        self.burnPositionCombobox.addItem(parameters.strFlash)
-        self.burnPositionCombobox.addItem(parameters.strSRAM)
+        self.burnPositionCombobox.addItem(tr("Flash"))
+        self.burnPositionCombobox.addItem(tr("SRAM"))
         boardSettingsLayout.addWidget(self.boardLabel, 0, 0)
         boardSettingsLayout.addWidget(self.boardCombobox, 0, 1)
         boardSettingsLayout.addWidget(self.burnPositionLabel, 1, 0)
         boardSettingsLayout.addWidget(self.burnPositionCombobox, 1, 1)
 
         # widgets serial settings
-        serialSettingsGroupBox = QGroupBox(parameters.strSerialSettings)
+        serialSettingsGroupBox = QGroupBox(tr("SerialSettings"))
         serialSettingsLayout = QGridLayout()
-        serialPortLabek = QLabel(parameters.strSerialPort)
-        serailBaudrateLabel = QLabel(parameters.strSerialBaudrate)
+        serialPortLabek = QLabel(tr("SerialPort"))
+        serailBaudrateLabel = QLabel(tr("SerialBaudrate"))
         self.serialPortCombobox = ComboBox()
         self.serailBaudrateCombobox = ComboBox()
         self.serailBaudrateCombobox.addItem("115200")
@@ -187,13 +189,13 @@ class MainWindow(QMainWindow):
         self.progressbarRootWidget.hide()
 
         # widgets download area
-        self.downloadButton = QPushButton(parameters.strDownload)
+        self.downloadButton = QPushButton(tr("Download"))
         downloadLayout.addWidget(self.downloadButton)
 
         # main window
         self.statusBarStauts = QLabel()
         self.statusBarStauts.setMinimumWidth(80)
-        self.statusBarStauts.setText("<font color=%s>%s</font>" %("#1aac2d", parameters.strDownloadHint))
+        self.statusBarStauts.setText("<font color=%s>%s</font>" %("#1aac2d", tr("DownloadHint")))
         self.statusBar().addWidget(self.statusBarStauts)
 
         self.resize(400, 550)
@@ -206,7 +208,7 @@ class MainWindow(QMainWindow):
         if sys.platform == "win32":
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(parameters.appName)
         self.show()
-        print("config file path:",os.getcwd()+"/"+parameters.strConfigFilePath)
+        print("config file path:",os.getcwd()+"/"+parameters.configFilePath)
 
     def initEvent(self):
         self.serialPortCombobox.clicked.connect(self.portComboboxClicked)
@@ -215,6 +217,8 @@ class MainWindow(QMainWindow):
         self.downloadResultSignal.connect(self.downloadResult)
         self.showSerialComboboxSignal.connect(self.showCombobox)
         self.updateProgressSignal.connect(self.updateProgress)
+        self.updateProgressPrintSignal.connect(self.updateProgressPrint)
+        self.langButton.clicked.connect(self.langChange)
         self.skinButton.clicked.connect(self.skinChange)
         self.aboutButton.clicked.connect(self.showAbout)
         self.openFileButton.clicked.connect(self.selectFile)
@@ -259,14 +263,14 @@ class MainWindow(QMainWindow):
         if oldPath=="":
             oldPath = os.getcwd()
         fileName_choose, filetype = QFileDialog.getOpenFileName(self,  
-                                    parameters.strSelectFile,  
+                                    tr("SelectFile"),  
                                     oldPath,
                                     "All Files (*);;bin Files (*.bin);;k210 packages (*.kfpkg)")   # 设置文件扩展名过滤,用双分号间隔
 
         if fileName_choose == "":
             return
         if not self.checkFileName(fileName_choose):
-            self.errorSignal.emit("File Error", "file type error, only support *.bin and *.kfpkg")
+            self.errorSignal.emit(tr("Error"), tr("FileTypeError"))
             return
         self.filePathWidget.setText(fileName_choose)
 
@@ -321,34 +325,48 @@ class MainWindow(QMainWindow):
         self.isDetectSerialPort = False
 
     def programExitSaveParameters(self):
-        paramObj = parameters.ParametersToSave()
+        paramObj = paremeters_save.ParametersToSave()
         paramObj.filePath = self.filePathWidget.text()
         paramObj.board    = self.boardCombobox.currentText()
         paramObj.burnPosition = self.burnPositionCombobox.currentText()
         paramObj.baudRate = self.serailBaudrateCombobox.currentIndex()
         paramObj.skin = self.param.skin
-        f = open(parameters.strConfigFilePath,"wb")
+        paramObj.language = translation.current_lang
+        f = open(parameters.configFilePath,"wb")
         f.truncate()
         pickle.dump(paramObj, f)
         f.close()
 
     def programStartGetSavedParameters(self):
-        paramObj = parameters.ParametersToSave()
+        paramObj = paremeters_save.ParametersToSave()
         try:
-            f = open(parameters.strConfigFilePath, "rb")
+            f = open(parameters.configFilePath, "rb")
             paramObj = pickle.load( f)
             f.close()
         except Exception as e:
-            f = open(parameters.strConfigFilePath, "wb")
+            f = open(parameters.configFilePath, "wb")
             f.close()
-        self.filePathWidget.setText(paramObj.filePath)
-        self.boardCombobox.setCurrentText(paramObj.board)
-        self.burnPositionCombobox.setCurrentText(paramObj.burnPosition)
-        self.serailBaudrateCombobox.setCurrentIndex(paramObj.baudRate)
+        translation.setLanguage(paramObj.language)
         self.param = paramObj
+
+    def updateFrameParams(self):
+        self.filePathWidget.setText(self.param.filePath)
+        self.boardCombobox.setCurrentText(self.param.board)
+        self.burnPositionCombobox.setCurrentText(self.param.burnPosition)
+        self.serailBaudrateCombobox.setCurrentIndex(self.param.baudRate)
 
     def closeEvent(self, event):
         self.programExitSaveParameters()
+
+    def langChange(self):
+        if self.param.language == translation.language_en:
+            translation.setLanguage(translation.language_zh)
+        else:
+            translation.setLanguage(translation.language_en)
+        self.hint(tr("Hint"), tr("Success") +"\n"+ tr("Reboot to take effect"))
+        self.frameWidget.style().unpolish(self.downloadButton)
+        self.frameWidget.style().polish(self.downloadButton)
+        self.frameWidget.update()
 
     def skinChange(self):
         if self.param.skin == 1: # light
@@ -360,7 +378,7 @@ class MainWindow(QMainWindow):
         self.app.setStyleSheet(file.read().replace("$DataPath", self.DataPath))
 
     def showAbout(self):
-        QMessageBox.information(self, "About","<h1 style='color:#f75a5a';margin=10px;>"+parameters.appName+
+        QMessageBox.information(self, tr("About"),"<h1 style='color:#f75a5a';margin=10px;>"+parameters.appName+
                                 '</h1><br><b style="color:#08c7a1;margin = 5px;">V'+str(helpAbout.versionMajor)+"."+
                                 str(helpAbout.versionMinor)+"."+str(helpAbout.versionDev)+
                                 "</b><br><br>"+helpAbout.date+"<br><br>"+helpAbout.strAbout())
@@ -374,48 +392,64 @@ class MainWindow(QMainWindow):
         os.system('start devmgmt.msc')
 
     def updateProgress(self, fileTypeStr, current, total, speedStr):
-        if self.burnPositionCombobox.currentText() == parameters.strSRAM:
-            fileTypeStr = parameters.strToSRAM
+        currBurnPos = self.burnPositionCombobox.currentText()
+        if currBurnPos == tr("SRAM") or currBurnPos == tr_en("SRAM"):
+            fileTypeStr = tr("ToSRAM")
         percent = current/float(total)*100
-        hint = "<font color=%s>downloading %s:</font>   <font color=%s> %.2f%%</font>   <font color=%s> %s</font>" %("#ff7575", fileTypeStr, "#2985ff", percent, "#1aac2d", speedStr)
-        # self.statusBarStauts.setText(hint)
+        hint = "<font color=%s>%s %s:</font>   <font color=%s> %.2f%%</font>   <font color=%s> %s</font>" %("#ff7575", tr("Downloading"), fileTypeStr, "#2985ff", percent, "#1aac2d", speedStr)
         self.progressHint.setText(hint)
         self.progressbar.setValue(percent)
+    
+    def updateProgressPrint(self, str):
+        self.statusBarStauts.setText(str)
+
+    def kflash_py_printCallback(self, *args, end = "\n"):
+        msg = ""
+        for i in args:
+            msg += str(i)
+        msg.replace("\n", " ")
+        self.updateProgressPrintSignal.emit(msg)
 
     def progress(self, fileTypeStr, current, total, speedStr):
         self.updateProgressSignal.emit(fileTypeStr, current, total, speedStr)
 
     def download(self):
         if self.burning:
-            # errMsg = parameters.strCancel
             self.terminateBurn()
-            # self.downloadResultSignal.emit(False, errMsg)
             return
 
         self.burning = True
         filename = self.filePathWidget.text()
         if not self.checkFileName(filename):
-            self.errorSignal.emit("Error", "File path error!")
+            self.errorSignal.emit(tr("Error"), tr("FilePathError"))
             self.burning = False
             return
         color = False
         board = "dan"
-        if self.boardCombobox.currentText()==parameters.strSipeedMaixGoE:
+        boardText = self.boardCombobox.currentText()
+        if boardText == parameters.SipeedMaixGoE:
             board = "goE"
-        elif self.boardCombobox.currentText()==parameters.strSipeedMaixGoD:
+        elif boardText == parameters.SipeedMaixGoD:
             board = "goD"
+        elif boardText == parameters.SipeedMaixBit:
+            board = "bit"
+        elif boardText == parameters.KendriteKd233:
+            board = "kd233"
+
+
         sram = False
-        if self.burnPositionCombobox.currentText()==parameters.strSRAM:
+        if self.burnPositionCombobox.currentText()==tr("SRAM") or \
+            self.burnPositionCombobox.currentText()==tr_en("SRAM"):
             sram = True
         try:
             baud = int(self.serailBaudrateCombobox.currentText())
         except Exception:
-            self.errorSignal.emit("Error", "baud rate error")
+            self.errorSignal.emit(tr("Error"), tr("BaudrateError"))
             self.burning = False
             return
         dev  = self.serialPortCombobox.currentText().split()[0]
         if dev=="":
-            self.errorSignal.emit("Error", "please select serial port")
+            self.errorSignal.emit(tr("Error"), tr("PleaseSelectSerialPort"))
             self.burning = False
             return
         # hide setting widgets
@@ -424,13 +458,13 @@ class MainWindow(QMainWindow):
         self.progressbar.setValue(0)
         self.progressbarRootWidget.show()
         self.progressHint.show()
-        self.downloadButton.setText(parameters.strCancel)
+        self.downloadButton.setText(tr("Cancel"))
         self.downloadButton.setProperty("class", "redbutton")
         self.downloadButton.style().unpolish(self.downloadButton)
         self.downloadButton.style().polish(self.downloadButton)
         self.downloadButton.update()
-        self.statusBarStauts.setText("<font color=%s>downloading ...</font>" %("#1aac2d"))
-        hint = "<font color=%s>%s</font>" %("#ff0d0d", parameters.strDownloadStart)
+        self.statusBarStauts.setText("<font color=%s>%s ...</font>" %("#1aac2d", tr("Downloading")))
+        hint = "<font color=%s>%s</font>" %("#ff0d0d", tr("DownloadStart"))
         self.progressHint.setText(hint)
         # download
         self.burnThread = threading.Thread(target=self.flashBurnProcess, args=(dev, baud, board, sram, filename, self.progress, color,))
@@ -454,17 +488,17 @@ class MainWindow(QMainWindow):
 
     def downloadResult(self, success, msg):
         if success:
-            self.hintSignal.emit("Success", "Burn success")
-            self.statusBarStauts.setText("<font color=%s>%s</font>" %("#1aac2d", parameters.strDownloadSuccess))
+            self.hintSignal.emit(tr("Success"), tr("DownloadSuccess"))
+            self.statusBarStauts.setText("<font color=%s>%s</font>" %("#1aac2d", tr("DownloadSuccess")))
         else:
             if msg == "Cancel":
-                self.statusBarStauts.setText("<font color=%s>%s</font>" %("#ff1d1d", parameters.strDownloadCanceled))
+                self.statusBarStauts.setText("<font color=%s>%s</font>" %("#ff1d1d", tr("DownloadCanceled")))
             else:
-                msg = parameters.strErrorSettingHint + "\n\n"+msg
-                self.errorSignal.emit("Error", msg)
-                self.statusBarStauts.setText("<font color=%s>%s</font>" %("#ff1d1d", parameters.strDownloadFail))
+                msg = tr("ErrorSettingHint") + "\n\n"+msg
+                self.errorSignal.emit(tr("Error"), msg)
+                self.statusBarStauts.setText("<font color=%s>%s</font>" %("#ff1d1d", tr("DownloadFail")))
             self.progressHint.setText("")
-        self.downloadButton.setText(parameters.strDownload)
+        self.downloadButton.setText(tr("Download"))
         self.downloadButton.setProperty("class", "normalbutton")
         self.downloadButton.style().unpolish(self.downloadButton)
         self.downloadButton.style().polish(self.downloadButton)
@@ -476,7 +510,7 @@ class MainWindow(QMainWindow):
         self.burning = False
 
     def terminateBurn(self):
-        hint = "<font color=%s>%s</font>" %("#ff0d0d", parameters.strDownloadCanceling)
+        hint = "<font color=%s>%s</font>" %("#ff0d0d", tr("DownloadCanceling"))
         self.progressHint.setText(hint)
         self.kflash.kill()
 

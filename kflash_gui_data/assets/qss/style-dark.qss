@@ -58,6 +58,18 @@ QWidget {
 .menuItem2:hover {
     border-image: url("$DataPath/assets/skin-white.png")
 }
+.menuItemLang {
+    min-height:27px;
+    height:27px;
+    min-width:27px;
+    width:27px;
+    border-radius: 5px;
+    margin-right:10px;
+    border-image: url("$DataPath/assets/lang.png")
+}
+.menuItemLang:hover {
+    border-image: url("$DataPath/assets/lang-white.png")
+}
 .menuItem3 {
     min-height:27px;
     height:27px;
