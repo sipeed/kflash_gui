@@ -25,6 +25,10 @@ Cross platform GUI wrapper for [kflash.py](https://github.com/sipeed/kflash.py.g
 
 ## Usage
 
+* Download bin file (`kflash_gui_v*.*`)  [here](https://github.com/sipeed/kflash_gui/releases)
+
+* Compress and double click `kflash_gui.exe` or `kflash_gui`, you can create your own shortcut by yourself
+
 * Select `bin` file or `kfpkg` file
 * Select board
 * Select where firmware flash to, `Flash` or `SRAM`
@@ -57,6 +61,10 @@ Cross platform GUI wrapper for [kflash.py](https://github.com/sipeed/kflash.py.g
 * 支持取消下载进程
 
 ## 使用方法
+
+* 下载文件(`kflash_gui_v*.*`)  下载地址：[release页面](https://github.com/sipeed/kflash_gui/releases)
+
+* 解压， 并双击 `kflash_gui.exe` 或 `kflash_gui`， 可以自行建快捷方式或者固定到开始页面或者固定要任务栏方便使用
 
 * 选择 `bin` 文件或者 `kfpkg` 文件
 * 选择开发板
