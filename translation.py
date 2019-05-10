@@ -11,7 +11,7 @@ for f in os.listdir(parameters.translationPathAbs):
     if lang == "":
         continue
     f = parameters.translationPathAbs+"/"+f
-    with open(f,"r") as fd:
+    with open(f,"r", encoding='utf-8') as fd:
         try:
             jsonObj = json.loads(fd.read())
         except Exception as e:
