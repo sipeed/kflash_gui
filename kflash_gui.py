@@ -361,9 +361,12 @@ class MainWindow(QMainWindow):
     def langChange(self):
         if self.param.language == translation.language_en:
             translation.setLanguage(translation.language_zh)
+            lang = tr("Chinese language")
         else:
             translation.setLanguage(translation.language_en)
-        self.hint(tr("Hint"), tr("Success") +"\n"+ tr("Reboot to take effect"))
+            lang = tr("English language")
+        
+        self.hint(tr("Hint"), tr("Language Changed to ") + lang + "\n"+ tr("Reboot to take effect"))
         self.frameWidget.style().unpolish(self.downloadButton)
         self.frameWidget.style().polish(self.downloadButton)
         self.frameWidget.update()

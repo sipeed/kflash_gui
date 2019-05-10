@@ -64,5 +64,8 @@
     "ErrorSettingHint": "Check your settings and try again， or replug in USB cable",
     "DownloadStart": "Starting download, wait ...",
     "Hint": "Hint",
-    "Reboot to take effect": "Reboot to take effect"
+    "Reboot to take effect": "Reboot to take effect",
+    "Language Changed to ": "Language Changed to ",
+    "Chinese language": "Chinese",
+    "English language": "English"
 }

@@ -64,5 +64,8 @@
     "ErrorSettingHint": "检查设置并重试，或者重插USB尝试",
     "DownloadStart": "正在开始下载, 请稍后...",
     "Hint": "提示",
-    "Reboot to take effect": "重启生效"
+    "Reboot to take effect": "重启生效",
+    "Language Changed to ": "语言修改为 ",
+    "Chinese language": "中文",
+    "English language": "英文"
 }
