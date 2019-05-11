@@ -27,7 +27,9 @@ Cross platform GUI wrapper for [kflash.py](https://github.com/sipeed/kflash.py.g
 
 * Download bin file (`kflash_gui_v*.*`)  [here](https://github.com/sipeed/kflash_gui/releases)
 
-* Compress and double click `kflash_gui.exe` or `kflash_gui`, you can create your own shortcut by yourself
+* Compress and double click `kflash_gui.exe` or `kflash_gui`
+
+* you can create your own shortcut by yourself； If `Linux`， edit the path in `kflash_gui.desktop`, then copy this file to `/usr/share/application` folder with administrator, and finally you can find `kflash_gui` app in the system menu
 
 * Select `bin` file or `kfpkg` file
 * Select board
@@ -69,7 +71,9 @@ Refer here: [blog.sipeed.com/p/390.html](http://blog.sipeed.com/p/390.html)
 
 * 下载文件(`kflash_gui_v*.*`)  下载地址：[release页面](https://github.com/sipeed/kflash_gui/releases)
 
-* 解压， 并双击 `kflash_gui.exe` 或 `kflash_gui`， 可以自行建快捷方式或者固定到开始页面或者固定要任务栏方便使用
+* 解压， 并双击 `kflash_gui.exe` 或 `kflash_gui`
+* 
+* 可以自行建快捷方式或者固定到开始页面或者固定要任务栏方便使用； 如果是 `Linux`， 可以修改 `kflash_gui.desktop` 里面的路径， 然后用管理员身份复制到`/usr/share/application` 目录， 然后就可以在系统菜单里面找到`kflash_gui`的图标了，点击即可打开
 
 * 选择 `bin` 文件或者 `kfpkg` 文件
 * 选择开发板

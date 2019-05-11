@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0.0
+Type=Application
+Name=kflash_gui
+Comment=download tool with GUI for k210
+Exec=/home/neucrack/software/kflash_gui/kflash_gui %U
+Icon=/home/neucrack/software/kflash_gui/kflash_gui_data/assets/logo.ico
+Categories=Development;
+Terminal=false
+StartupNotify=true
+MimeType=application/x-executable;
