@@ -140,10 +140,13 @@ class MainWindow(QMainWindow):
         self.boardCombobox = ComboBox()
         self.boardCombobox.addItem(parameters.SipeedMaixDock)
         self.boardCombobox.addItem(parameters.SipeedMaixBit)
+        self.boardCombobox.addItem(parameters.SipeedMaixBitMic)
         self.boardCombobox.addItem(parameters.SipeedMaixduino)
         self.boardCombobox.addItem(parameters.SipeedMaixGo)
         self.boardCombobox.addItem(parameters.SipeedMaixGoD)
-        self.boardCombobox.addItem(parameters.KendriteKd233)
+        self.boardCombobox.addItem(parameters.KendryteKd233)
+        self.boardCombobox.addItem(parameters.kendryteTrainer)
+        self.boardCombobox.addItem(parameters.Auto)
         self.burnPositionLabel = QLabel(tr("BurnTo"))
         self.burnPositionCombobox = ComboBox()
         self.burnPositionCombobox.addItem(tr("Flash"))
@@ -439,8 +442,14 @@ class MainWindow(QMainWindow):
             board = "maixduino"
         elif boardText == parameters.SipeedMaixBit:
             board = "bit"
-        elif boardText == parameters.KendriteKd233:
+        elif boardText == parameters.SipeedMaixBitMic:
+            board = "bit_mic"
+        elif boardText == parameters.KendryteKd233:
             board = "kd233"
+        elif boardText == parameters.kendryteTrainer:
+            board = "trainer"
+        elif boardText == parameters.Auto:
+            board = None
 
         sram = False
         if self.burnPositionCombobox.currentText()==tr("SRAM") or \
@@ -480,7 +489,10 @@ class MainWindow(QMainWindow):
         success = True
         errMsg = ""
         try:
-            self.kflash.process(terminal=False, dev=dev, baudrate=baud, board=board, sram = sram, file=filename, callback=callback, noansi=not color)
+            if board:
+                self.kflash.process(terminal=False, dev=dev, baudrate=baud, board=board, sram = sram, file=filename, callback=callback, noansi=not color)
+            else:
+                self.kflash.process(terminal=False, dev=dev, baudrate=baud, sram = sram, file=filename, callback=callback, noansi=not color)
         except Exception as e:
             errMsg = str(e)
             if str(e) != "Burn SRAM OK":
