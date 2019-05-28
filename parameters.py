@@ -12,8 +12,9 @@ configFilePath  = "kflash_gui.conf"
 
 SipeedMaixDock = "Sipeed Maix Dock"
 SipeedMaixBit  = "Sipeed Maix Bit"
-SipeedMaixGoE  = "Sipeed Maix Go(open-ec)"
-SipeedMaixGoD  = "Sipeed Maix Go(CMSIS-DAP)"
+SipeedMaixGo   = "Sipeed Maix Go"
+SipeedMaixGoD  = "Sipeed Maix Go( Old CMSIS-DAP )"
+SipeedMaixduino= "Sipeed Maixduino"
 KendriteKd233  = "Kendryte KD233"
 
 # get data path

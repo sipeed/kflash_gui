@@ -1,6 +1,7 @@
 {
     "Download": "Download",
     "Downloading": "Downloading",
+    "Author": "Author",
     "Send": "Send",
     "Cancel": "Cancel",
     "About": "About",
@@ -66,5 +67,9 @@
     "Reboot to take effect": "Reboot to take effect",
     "Language Changed to ": "Language Changed to ",
     "Chinese language": "Chinese",
-    "English language": "English"
+    "English language": "English",
+    "is a Open source project created by": "is a Open source project created by",
+    "See more on": "See more on",
+    "Licensed with": "Licensed with",
+    "GUI dirived from": "GUI dirived from"
 }

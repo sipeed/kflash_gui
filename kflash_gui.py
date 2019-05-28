@@ -140,7 +140,8 @@ class MainWindow(QMainWindow):
         self.boardCombobox = ComboBox()
         self.boardCombobox.addItem(parameters.SipeedMaixDock)
         self.boardCombobox.addItem(parameters.SipeedMaixBit)
-        self.boardCombobox.addItem(parameters.SipeedMaixGoE)
+        self.boardCombobox.addItem(parameters.SipeedMaixduino)
+        self.boardCombobox.addItem(parameters.SipeedMaixGo)
         self.boardCombobox.addItem(parameters.SipeedMaixGoD)
         self.boardCombobox.addItem(parameters.KendriteKd233)
         self.burnPositionLabel = QLabel(tr("BurnTo"))
@@ -430,15 +431,16 @@ class MainWindow(QMainWindow):
         color = False
         board = "dan"
         boardText = self.boardCombobox.currentText()
-        if boardText == parameters.SipeedMaixGoE:
+        if boardText == parameters.SipeedMaixGo:
             board = "goE"
         elif boardText == parameters.SipeedMaixGoD:
             board = "goD"
+        elif boardText == parameters.SipeedMaixduino:
+            board = "maixduino"
         elif boardText == parameters.SipeedMaixBit:
             board = "bit"
         elif boardText == parameters.KendriteKd233:
             board = "kd233"
-
 
         sram = False
         if self.burnPositionCombobox.currentText()==tr("SRAM") or \

@@ -1,12 +1,10 @@
 import sys
-try:
-    import parameters
-except ImportError:
-    from COMTool import parameters
+import parameters
 import os
+from translation import tr, tr_en
 
 versionMajor = 1
-versionMinor = 0
+versionMinor = 1
 versionDev   = 0
 date = "2019.5.10"
 
@@ -21,15 +19,16 @@ def strAbout():
     print(strPath)
     a =strPath+"/"+parameters.appLogo2
     print(a)
+    py_version = sys.version_info
     return '''\
-Python 3 + PyQt5<br><br>
-<div><div>'''+parameters.appName+''' is a Open source project create by </div><a style="vertical-align: middle;" href="http://www.sipeed.com"><img src="'''+strPath+"/"+parameters.appLogo2+'''" width=109 height=32></img></a><br></div>
-author: '''+parameters.author+'''<br><br>
+Python ''' +str(py_version[0]+py_version[1]/10)+ ''' + PyQt5<br><br>
+<div><div>'''+parameters.appName+tr("is a Open source project created by")+''' </div><a style="vertical-align: middle;" href="http://www.sipeed.com"><img src="'''+strPath+"/"+parameters.appLogo2+'''" width=109 height=32></img></a><br></div>
+''' +tr("Author")+":"+parameters.author+'''<br><br>
 
-See more on <b><a href="https://github.com/Sipeed/kflash_gui.git">Github</a></b>, Licensed with <a href="https://github.com/sipeed/kflash_gui/blob/master/LICENSE">LGPL3.0</a><br><br>
+'''+tr("See more on")+''' <b><a href="https://github.com/Sipeed/kflash_gui.git">Github</a></b>,  '''+tr("Licensed with")+''' <a href="https://github.com/sipeed/kflash_gui/blob/master/LICENSE">LGPL3.0</a><br><br>
 
 
-GUI dirived from <b><a href="https://github.com/Neutree/ComTool.git">ComTool</a></b>, Licensed with <a href="https://github.com/Neutree/COMTool/blob/master/LICENSE">LGPL3.0</a>
+'''+tr("GUI dirived from")+''' <b><a href="https://github.com/Neutree/ComTool.git">ComTool</a></b>,  '''+tr("Licensed with")+''' <a href="https://github.com/Neutree/COMTool/blob/master/LICENSE">LGPL3.0</a>
 
 '''
 

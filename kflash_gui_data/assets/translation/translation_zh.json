@@ -1,6 +1,7 @@
 {
     "Download": "下载",
     "Downloading": "正在下载",
+    "Author": "作者",
     "Send": "发送",
     "Cancel": "取消",
     "About": "关于",
@@ -66,5 +67,9 @@
     "Reboot to take effect": "重启生效",
     "Language Changed to ": "语言修改为 ",
     "Chinese language": "中文",
-    "English language": "英文"
+    "English language": "英文",
+    "is a Open source project created by": "是一个开源项目，创建者：",
+    "See more on": "更详细地，请看",
+    "Licensed with": "开源协议：",
+    "GUI dirived from": "GUI（界面）修改自："
 }
