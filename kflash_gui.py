@@ -188,7 +188,7 @@ class MainWindow(QMainWindow):
         # widgets progress bar
         
         self.progressbar = QProgressBar(self.progressbarRootWidget)
-        self.progressbar.setGeometry(10, 0, 360, 40)
+        self.progressbar.setGeometry(10, 0, 400, 40)
         self.progressbar.setValue(0)
         self.progressbarRootWidget.hide()
 
