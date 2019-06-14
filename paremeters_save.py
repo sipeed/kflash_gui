@@ -1,17 +1,43 @@
 import translation, parameters
 from translation import tr_en
+import json
 
 
 class ParametersToSave:
-    filePath = ""
-    board    = parameters.SipeedMaixBit
-    burnPosition = tr_en("Flash")
-    baudRate = 2
-    skin = 2
-    language = translation.language_en
 
     def __init__(self):
+        self.files = []       # kfpkg: [file path]
+                        # bin files: [(path,addr,prefix), ...]
+        self.board    = parameters.SipeedMaixBit
+        self.burnPosition = tr_en("Flash")
+        self.baudRate = 2
+        self.skin = 2
+        self.language = translation.language_en
         return
 
     def __del__(self):
         return
+    
+    def save(self, path):
+        data = {}
+        data["files"] = self.files
+        data["board"] = self.board
+        data["burn_pos"] = self.burnPosition
+        data["skin"] = self.skin
+        data["language"] = self.language
+        with open(path, "w") as f:
+            json.dump(data, f)
+    
+    def load(self, path):
+        try:
+            with open(path, "r") as f:
+                data = json.load(f)
+        except Exception as e:
+            return
+        self.files = data["files"]
+        self.board = data["board"]
+        self.burnPosition = data["burn_pos"]
+        self.skin = data["skin"]
+        self.language = data["language"]
+
+

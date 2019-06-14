@@ -19,10 +19,6 @@ import serial.tools.list_ports
 import threading
 import time
 import binascii,re
-try:
-  import cPickle as pickle
-except ImportError:
-  import pickle
 if sys.platform == "win32":
     import ctypes
 from  kflash_py.kflash import KFlash
@@ -48,8 +44,8 @@ class MainWindow(QMainWindow):
         self.programStartGetSavedParameters()
         self.initVar()
         self.initWindow()
-        self.updateFrameParams()
         self.initEvent()
+        self.updateFrameParams()
 
     def __del__(self):
         pass
@@ -144,8 +140,6 @@ class MainWindow(QMainWindow):
         self.fileSelectWidgets = [["kfpkg", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, None, openFileButton]]
                   # for "button": ["button", addoneWidget, addoneWidgetLayout, addFileButton, packFileButton]
                   # for "bin":    ["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox]
-        self.filePathWidget = QLineEdit()
-
         # widgets board select
         boardSettingsGroupBox = QGroupBox(tr("BoardSettings"))
         settingLayout.addWidget(boardSettingsGroupBox)
@@ -298,7 +292,7 @@ class MainWindow(QMainWindow):
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 
-    def addAddFileButton(self):
+    def addAddFileWidget(self):
         oneFilePathWidget = QWidget()
         oneFilePathWidgetLayout = QHBoxLayout()
         oneFilePathWidget.setLayout(oneFilePathWidgetLayout)
@@ -347,7 +341,7 @@ class MainWindow(QMainWindow):
             filePathWidget.setText(name)
             # TODO: resize window
 
-    def fileSelectShowBin(self, index, name):
+    def fileSelectShowBin(self, index, name, addr=None, prefix=None, prefixAuto=False ):
         if index==0 and self.fileSelectWidget_Type(0) == "kfpkg": #only one kgpkg before
             self.fileSelectWidget_Button(index).clicked.disconnect()
             # self.fileSelectLayout.removeWidget(self.fileSelectWidget_Widget(index))
@@ -371,6 +365,8 @@ class MainWindow(QMainWindow):
             self.fileSelectLayout.addWidget(oneFilePathWidget)
             self.fileSelectWidgets.append(["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox])
             openFileButton.clicked.connect(lambda:self.selectFile(index))
+            if addr:
+                fileBurnAddrWidget.setText("0x%06x" %(addr))
             # add ADD button
             addoneWidget = QWidget()
             addoneWidgetLayout = QHBoxLayout()
@@ -381,15 +377,19 @@ class MainWindow(QMainWindow):
             addoneWidgetLayout.addWidget(packFileButton)
             self.fileSelectLayout.addWidget(addoneWidget)
             self.fileSelectWidgets.append(["button", addoneWidget, addoneWidgetLayout, addFileButton, packFileButton])
-            addFileButton.clicked.connect(self.addAddFileButton)
+            addFileButton.clicked.connect(self.addAddFileWidget)
             packFileButton.clicked.connect(self.packFile)
 
         self.fileSelectWidget_Path(index).setText(name)
-        if name.endswith(".bin"):
+
+        if prefixAuto:
+            if name.endswith(".bin"):
+                self.fileSelectWidget_Prefix(index).setChecked(True)
+            else:
+                self.fileSelectWidget_Prefix(index).setChecked(False)
+        elif prefix:
             self.fileSelectWidget_Prefix(index).setChecked(True)
-        else:
-            self.fileSelectWidget_Prefix(index).setChecked(False)
-    
+
     # return: ("kfpkg", [(file path, burn addr, add prefix),...])
     #      or ("bin", file path)
     #      or (None, None)
@@ -526,7 +526,7 @@ class MainWindow(QMainWindow):
         if self.isKfpkg(fileName_choose):
             self.fileSelectShowKfpkg(index, fileName_choose)
         else:
-            self.fileSelectShowBin(index, fileName_choose)
+            self.fileSelectShowBin(index, fileName_choose, prefixAuto=True)
 
     def errorHint(self, title, str):
         QMessageBox.critical(self, title, str)
@@ -583,31 +583,41 @@ class MainWindow(QMainWindow):
 
     def programExitSaveParameters(self):
         paramObj = paremeters_save.ParametersToSave()
-        paramObj.filePath = self.filePathWidget.text()
         paramObj.board    = self.boardCombobox.currentText()
         paramObj.burnPosition = self.burnPositionCombobox.currentText()
         paramObj.baudRate = self.serailBaudrateCombobox.currentIndex()
         paramObj.skin = self.param.skin
         paramObj.language = translation.current_lang
-        f = open(parameters.configFilePath,"wb")
-        f.truncate()
-        pickle.dump(paramObj, f)
-        f.close()
+        path = self.fileSelectWidget_Path(0).text()
+        if path.endswith(".kfpkg"):
+            paramObj.files.append(path)
+        else:
+            for i in range(len(self.fileSelectWidgets)):
+                try:
+                    addr = int(self.fileSelectWidget_Addr(i).text(),16)
+                except Exception:
+                    continue
+                paramObj.files.append( (self.fileSelectWidget_Path(i).text(), addr, self.fileSelectWidget_Prefix(i).isChecked()) )
+        paramObj.save(parameters.configFilePath)
 
     def programStartGetSavedParameters(self):
         paramObj = paremeters_save.ParametersToSave()
-        try:
-            f = open(parameters.configFilePath, "rb")
-            paramObj = pickle.load( f)
-            f.close()
-        except Exception as e:
-            f = open(parameters.configFilePath, "wb")
-            f.close()
+        paramObj.load(parameters.configFilePath)
         translation.setLanguage(paramObj.language)
         self.param = paramObj
 
     def updateFrameParams(self):
-        self.filePathWidget.setText(self.param.filePath)
+        pathLen = len(self.param.files)
+        if pathLen == 1 and type(self.param.files[0])==str and self.param.files[0].endswith(".kfpkg"):
+            self.fileSelectWidget_Path(0).setText(self.param.files[0])
+        elif pathLen != 0:
+            index = 0
+            for path, addr, prefix  in self.param.files:
+                prefix = None if (not prefix) else True
+                if index!=0:
+                    self.addAddFileWidget()
+                self.fileSelectShowBin(index, path, addr, prefix)
+                index += 1
         self.boardCombobox.setCurrentText(self.param.board)
         self.burnPositionCombobox.setCurrentText(self.param.burnPosition)
         self.serailBaudrateCombobox.setCurrentIndex(self.param.baudRate)
