@@ -365,8 +365,6 @@ class MainWindow(QMainWindow):
             self.fileSelectLayout.addWidget(oneFilePathWidget)
             self.fileSelectWidgets.append(["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox])
             openFileButton.clicked.connect(lambda:self.selectFile(index))
-            if addr:
-                fileBurnAddrWidget.setText("0x%06x" %(addr))
             # add ADD button
             addoneWidget = QWidget()
             addoneWidgetLayout = QHBoxLayout()
@@ -389,6 +387,8 @@ class MainWindow(QMainWindow):
                 self.fileSelectWidget_Prefix(index).setChecked(False)
         elif prefix:
             self.fileSelectWidget_Prefix(index).setChecked(True)
+        if addr:
+                self.fileSelectWidget_Addr(index).setText("0x%06x" %(addr))
 
     # return: ("kfpkg", [(file path, burn addr, add prefix),...])
     #      or ("bin", file path)

@@ -5,7 +5,7 @@ from translation import tr, tr_en
 
 versionMajor = 1
 versionMinor = 2
-versionDev   = 0
+versionDev   = 1
 date = "2019.6.14"
 
 def strAbout():
