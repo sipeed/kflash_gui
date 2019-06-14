@@ -5,12 +5,13 @@ import parameters, helpAbout, autoUpdate, paremeters_save
 import translation
 from translation import tr, tr_en
 from Combobox import ComboBox
+import json, zipfile
 
 # from COMTool.wave import Wave
 from PyQt5.QtCore import pyqtSignal,Qt
 from PyQt5.QtWidgets import (QApplication, QWidget,QToolTip,QPushButton,QMessageBox,QDesktopWidget,QMainWindow,
                              QVBoxLayout,QHBoxLayout,QGridLayout,QLabel,
-                             QLineEdit,QGroupBox,QSplitter,QFileDialog,
+                             QLineEdit,QGroupBox,QSplitter,QFileDialog,QCheckBox,
                              QProgressBar)
 from PyQt5.QtGui import QIcon,QFont,QTextCursor,QPixmap
 import serial
@@ -58,6 +59,10 @@ class MainWindow(QMainWindow):
         self.isDetectSerialPort = False
         self.DataPath = parameters.dataPath
         self.kflash = KFlash(print_callback=self.kflash_py_printCallback)
+        self.saveKfpkDir = ""
+
+    def setWindowSize(self, w=500, h=550):
+        self.resize(w, h)
 
     def initWindow(self):
         QToolTip.setFont(QFont('SansSerif', 10))
@@ -122,10 +127,10 @@ class MainWindow(QMainWindow):
         menuLayout.addStretch(0)
         
         # widgets file select
-        fileSelectGroupBox = QGroupBox(tr("SelectFile"))
-        settingLayout.addWidget(fileSelectGroupBox)
+        self.fileSelectGroupBox = QGroupBox(tr("SelectFile"))
+        settingLayout.addWidget(self.fileSelectGroupBox)
         self.fileSelectLayout = QVBoxLayout()
-        fileSelectGroupBox.setLayout(self.fileSelectLayout)
+        self.fileSelectGroupBox.setLayout(self.fileSelectLayout)
         oneFilePathWidget = QWidget()
         oneFilePathWidgetLayout = QHBoxLayout()
         oneFilePathWidget.setLayout(oneFilePathWidgetLayout)
@@ -136,7 +141,9 @@ class MainWindow(QMainWindow):
         oneFilePathWidgetLayout.setStretch(0, 3)
         oneFilePathWidgetLayout.setStretch(1, 1)
         self.fileSelectLayout.addWidget(oneFilePathWidget)
-        self.fileSelectWidgets = [[oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, None, openFileButton]]
+        self.fileSelectWidgets = [["kfpkg", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, None, openFileButton]]
+                  # for "button": ["button", addoneWidget, addoneWidgetLayout, addFileButton, packFileButton]
+                  # for "bin":    ["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox]
         self.filePathWidget = QLineEdit()
 
         # widgets board select
@@ -210,7 +217,7 @@ class MainWindow(QMainWindow):
         self.statusBarStauts.setText("<font color=%s>%s</font>" %("#1aac2d", tr("DownloadHint")))
         self.statusBar().addWidget(self.statusBarStauts)
 
-        self.resize(400, 550)
+        self.setWindowSize()
         self.MoveToCenter()
         self.setWindowTitle(parameters.appName+" V"+str(helpAbout.versionMajor)+"."+str(helpAbout.versionMinor))
         icon = QIcon()
@@ -234,7 +241,7 @@ class MainWindow(QMainWindow):
         self.skinButton.clicked.connect(self.skinChange)
         self.aboutButton.clicked.connect(self.showAbout)
         self.downloadButton.clicked.connect(self.download)
-        self.fileSelectWidgets[0][4].clicked.connect(lambda:self.selectFile(0))
+        self.fileSelectWidget_Button(0).clicked.connect(lambda:self.selectFile(0))
 
         self.myObject=MyClass(self)
         slotLambda = lambda: self.indexChanged_lambda(self.myObject)
@@ -255,6 +262,24 @@ class MainWindow(QMainWindow):
             self.frameLayout.setStretch(3,1)
             self.frameLayout.setStretch(4,1)
             self.frameLayout.setStretch(5,1)
+    
+    def fileSelectWidget_Type(self, index):
+        return self.fileSelectWidgets[index][0]
+
+    def fileSelectWidget_Widget(self, index):
+        return self.fileSelectWidgets[index][1]
+    
+    def fileSelectWidget_Layout(self, index):
+        return self.fileSelectWidgets[index][2]
+
+    def fileSelectWidget_Path(self, index):
+        return self.fileSelectWidgets[index][3]
+
+    def fileSelectWidget_Addr(self, index):
+        return self.fileSelectWidgets[index][4]
+    
+    def fileSelectWidget_Button(self, index):
+        return self.fileSelectWidgets[index][5]
 
     # @QtCore.pyqtSlot(str)
     def indexChanged_lambda(self, obj):
@@ -270,12 +295,39 @@ class MainWindow(QMainWindow):
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 
+    def addAddFileButton(self):
+        oneFilePathWidget = QWidget()
+        oneFilePathWidgetLayout = QHBoxLayout()
+        oneFilePathWidget.setLayout(oneFilePathWidgetLayout)
+        filePathWidget = QLineEdit()
+        fileBurnAddrWidget = QLineEdit("0x00000")
+        fileBurnEncCheckbox = QCheckBox(tr("Prefix"))
+        openFileButton = QPushButton(tr("OpenFile"))
+        oneFilePathWidgetLayout.addWidget(filePathWidget)
+        oneFilePathWidgetLayout.addWidget(fileBurnAddrWidget)
+        oneFilePathWidgetLayout.addWidget(fileBurnEncCheckbox)
+        oneFilePathWidgetLayout.addWidget(openFileButton)
+        oneFilePathWidgetLayout.setStretch(0, 4)
+        oneFilePathWidgetLayout.setStretch(1, 2)
+        oneFilePathWidgetLayout.setStretch(2, 1)
+        oneFilePathWidgetLayout.setStretch(3, 2)
+        index = len(self.fileSelectWidgets)-1
+        self.fileSelectWidgets.insert(index, ["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox])
+        self.fileSelectLayout.insertWidget(index, oneFilePathWidget)
+        openFileButton.clicked.connect(lambda:self.selectFile(index))
+
     def fileSelectShowKfpkg(self, index, name):
-        if index==0 and self.fileSelectWidgets[index][3] == None: #only one kgpkg before
-            self.fileSelectWidgets[index][2].setText(name)
+        if index==0 and self.fileSelectWidget_Type(0) == "kfpkg": #only one kgpkg before
+            self.fileSelectWidget_Path(index).setText(name)
         else:# have bin file before, remove all and add one for kfpkg
-            for item in self.fileSelectWidgets:
-                self.fileSelectLayout.removeWidget(item[0])
+            for i in range(len(self.fileSelectWidgets)):
+                if self.fileSelectWidget_Type(i)=="button":
+                    self.fileSelectWidgets[i][3].clicked.disconnect()
+                    self.fileSelectWidgets[i][4].clicked.disconnect()
+                else:
+                    self.fileSelectWidget_Button(i).clicked.disconnect()
+                # self.fileSelectLayout.removeWidget(self.fileSelectWidget_Widget(i))
+                self.fileSelectWidget_Widget(i).setParent(None)
             self.fileSelectWidgets.clear()
             oneFilePathWidget = QWidget()
             oneFilePathWidgetLayout = QHBoxLayout()
@@ -287,34 +339,121 @@ class MainWindow(QMainWindow):
             oneFilePathWidgetLayout.setStretch(0, 3)
             oneFilePathWidgetLayout.setStretch(1, 1)
             self.fileSelectLayout.addWidget(oneFilePathWidget)
-            self.fileSelectWidgets.append([oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, None, openFileButton])
+            self.fileSelectWidgets.append(["kfpkg", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, None, openFileButton])
             openFileButton.clicked.connect(lambda:self.selectFile(0))
             filePathWidget.setText(name)
+            # TODO: resize window
 
     def fileSelectShowBin(self, index, name):
-        if index==0 and self.fileSelectWidgets[index][3] == None: #only one kgpkg before
-            self.fileSelectLayout.removeWidget(self.fileSelectWidgets[0][0])
+        if index==0 and self.fileSelectWidget_Type(0) == "kfpkg": #only one kgpkg before
+            self.fileSelectWidget_Button(index).clicked.disconnect()
+            # self.fileSelectLayout.removeWidget(self.fileSelectWidget_Widget(index))
+            self.fileSelectWidget_Widget(index).setParent(None)
             self.fileSelectWidgets.clear()
             oneFilePathWidget = QWidget()
             oneFilePathWidgetLayout = QHBoxLayout()
             oneFilePathWidget.setLayout(oneFilePathWidgetLayout)
             filePathWidget = QLineEdit()
             fileBurnAddrWidget = QLineEdit("0x00000")
+            fileBurnEncCheckbox = QCheckBox(tr("Prefix"))
             openFileButton = QPushButton(tr("OpenFile"))
             oneFilePathWidgetLayout.addWidget(filePathWidget)
             oneFilePathWidgetLayout.addWidget(fileBurnAddrWidget)
+            oneFilePathWidgetLayout.addWidget(fileBurnEncCheckbox)
             oneFilePathWidgetLayout.addWidget(openFileButton)
-            oneFilePathWidgetLayout.setStretch(0, 2)
-            oneFilePathWidgetLayout.setStretch(1, 1)
+            oneFilePathWidgetLayout.setStretch(0, 4)
+            oneFilePathWidgetLayout.setStretch(1, 2)
             oneFilePathWidgetLayout.setStretch(2, 1)
+            oneFilePathWidgetLayout.setStretch(3, 2)
             self.fileSelectLayout.addWidget(oneFilePathWidget)
-            self.fileSelectWidgets.append([oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton])
+            self.fileSelectWidgets.append(["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox])
             openFileButton.clicked.connect(lambda:self.selectFile(index))
-        self.fileSelectWidgets[index][2].setText(name)
+            # add ADD button
+            addoneWidget = QWidget()
+            addoneWidgetLayout = QHBoxLayout()
+            addoneWidget.setLayout(addoneWidgetLayout)
+            addFileButton = QPushButton(tr("Add File"))
+            packFileButton = QPushButton(tr("Pack to kfpkg"))
+            addoneWidgetLayout.addWidget(addFileButton)
+            addoneWidgetLayout.addWidget(packFileButton)
+            self.fileSelectLayout.addWidget(addoneWidget)
+            self.fileSelectWidgets.append(["button", addoneWidget, addoneWidgetLayout, addFileButton, packFileButton])
+            addFileButton.clicked.connect(self.addAddFileButton)
+            packFileButton.clicked.connect(self.packFile)
+
+        self.fileSelectWidget_Path(index).setText(name)
         
+    def packFile(self):
+        # generate flash-list.json
+        files = []
+        files_path = []
+        for i in range(len(self.fileSelectWidgets)):
+            if self.fileSelectWidgets[i][0] == "bin":
+                path = self.fileSelectWidget_Path(i).text().strip()
+                if path=="":
+                    continue
+                if not os.path.exists(path):
+                    self.errorSignal.emit(tr("Error"), tr("Line {}: ").format(i+1)+tr("File path error")+":"+path)
+                    return
+                try:
+                    addr = int(self.fileSelectWidgets[i][4].text(), 16)
+                except Exception:
+                    self.errorSignal.emit(tr("Error"), tr("Line {}: ").format(i+1)+tr("Address error")+self.fileSelectWidgets[i][4].text())
+                    return
+                files.append( (path, addr, self.fileSelectWidgets[i][6].isChecked()) )
+        kfpkg = {"version": "0.1.0", "files": []}
+        for path, addr, prefix in files:
+            f = {}
+            f_name = os.path.split(path)[1]
+            f["address"] = addr
+            f["bin"] = f_name
+            f["sha256Prefix"] = prefix
+            kfpkg["files"].append(f)
+            files_path.append(path)
+        kfpkg_json = json.dumps(kfpkg, indent=4)
+        # print(kfpkg_json)
+
+        # select saving path
+        if not os.path.exists(self.saveKfpkDir):
+            self.saveKfpkDir = os.getcwd()
+        fileName_choose, filetype = QFileDialog.getSaveFileName(self,  
+                                    tr("Save File"),  
+                                    self.saveKfpkDir,
+                                    "k210 packages (*.kfpkg)")
+
+        if fileName_choose == "":
+            self.errorSignal.emit(tr("Error"), tr("File path error"))
+            return
+        if not fileName_choose.endswith(".kfpkg"):
+            fileName_choose += ".kfpkg"
+        self.saveKfpkDir = os.path.split(fileName_choose)[0]
+        # print("save to ", fileName_choose)
+        
+        # write kfpkg file
+        tmp = self.saveKfpkDir+"/flash-list.json"
+        f = open(tmp, "w")
+        f.write(kfpkg_json)
+        f.close()
+        files_path.append(tmp)
+        resZipfile = self.saveZipFile(fileName_choose, files_path)
+        os.remove(tmp)
+        if resZipfile != True:
+            self.errorSignal.emit(tr("Error"), tr("Pack kfpkg fail")+":"+str(resZipfile[1]))
+            return
+        self.hintSignal.emit(tr("Success"), tr("Save kfpkg success"))
+
+    def saveZipFile(self, filename, files):
+        try:
+            zip = zipfile.ZipFile(filename, "w")
+            for f in files:
+                zip.write(f, arcname=os.path.split(f)[1], compress_type=zipfile.ZIP_LZMA)
+            zip.close()
+        except Exception as e:
+            return (False,e)
+        return True
 
     def selectFile(self, index):
-        oldPath = self.fileSelectWidgets[index][2].text()
+        oldPath = self.fileSelectWidget_Path(index).text()
         if oldPath=="":
             oldPath = os.getcwd()
         fileName_choose, filetype = QFileDialog.getOpenFileName(self,  
@@ -518,7 +657,11 @@ class MainWindow(QMainWindow):
             self.errorSignal.emit(tr("Error"), tr("BaudrateError"))
             self.burning = False
             return
-        dev  = self.serialPortCombobox.currentText().split()[0]
+        dev = ""
+        try:
+            dev  = self.serialPortCombobox.currentText().split()[0]
+        except Exception:
+            pass
         if dev=="":
             self.errorSignal.emit(tr("Error"), tr("PleaseSelectSerialPort"))
             self.burning = False

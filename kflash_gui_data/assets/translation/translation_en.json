@@ -72,5 +72,13 @@
     "See more on": "See more on",
     "Licensed with": "Licensed with",
     "GUI dirived from": "GUI dirived from",
-    "File path error": "File path error"
+    "File path error": "File path error",
+    "Add File": "Add File",
+    "Pack to kfpkg": "Pack to kfpkg",
+    "Prefix": "Prefix",
+    "Address error": "Address error",
+    "Line {}: ": "Line {}: ",
+    "Save kfpkg success": "Save kfpkg success",
+    "Save File": "Save File",
+    "Pack kfpkg fail": "Pack kfpkg fail"
 }

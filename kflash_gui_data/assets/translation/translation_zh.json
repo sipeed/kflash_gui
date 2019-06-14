@@ -72,5 +72,13 @@
     "See more on": "更详细地，请看",
     "Licensed with": "开源协议：",
     "GUI dirived from": "GUI（界面）修改自：",
-    "File path error": "文件路径错误"
+    "File path error": "文件路径错误",
+    "Add File": "增加文件",
+    "Pack to kfpkg": "打包为 kfpkg",
+    "Prefix": "校验头",
+    "Address error": "地址错误",
+    "Line {}: ": "第 {} 行: ",
+    "Save kfpkg success": "保存 kfpkg 成功",
+    "Save File": "保存文件",
+    "Pack kfpkg fail": "打包 kfpkg 失败"
 }
