@@ -4,9 +4,9 @@ import os
 from translation import tr, tr_en
 
 versionMajor = 1
-versionMinor = 1
-versionDev   = 1
-date = "2019.5.10"
+versionMinor = 2
+versionDev   = 0
+date = "2019.6.14"
 
 def strAbout():
     pathDirList = sys.argv[0].replace("\\", "/").split("/")
