@@ -61,7 +61,7 @@ class MainWindow(QMainWindow):
         self.kflash = KFlash(print_callback=self.kflash_py_printCallback)
         self.saveKfpkDir = ""
 
-    def setWindowSize(self, w=500, h=550):
+    def setWindowSize(self, w=520, h=550):
         self.resize(w, h)
 
     def initWindow(self):
@@ -280,6 +280,9 @@ class MainWindow(QMainWindow):
     
     def fileSelectWidget_Button(self, index):
         return self.fileSelectWidgets[index][5]
+    
+    def fileSelectWidget_Prefix(self, index):
+        return self.fileSelectWidgets[index][6]
 
     # @QtCore.pyqtSlot(str)
     def indexChanged_lambda(self, obj):
@@ -382,11 +385,22 @@ class MainWindow(QMainWindow):
             packFileButton.clicked.connect(self.packFile)
 
         self.fileSelectWidget_Path(index).setText(name)
-        
-    def packFile(self):
-        # generate flash-list.json
+        if name.endswith(".bin"):
+            self.fileSelectWidget_Prefix(index).setChecked(True)
+        else:
+            self.fileSelectWidget_Prefix(index).setChecked(False)
+    
+    # return: ("kfpkg", [(file path, burn addr, add prefix),...])
+    #      or ("bin", file path)
+    #      or (None, None)
+    def getBurnFilesInfo(self):
         files = []
-        files_path = []
+        if self.fileSelectWidgets[0][0] == "kfpkg":
+            path = self.fileSelectWidget_Path(0).text().strip()
+            if path=="" or not os.path.exists(path):
+                self.errorSignal.emit(tr("Error"), tr("Line {}: ").format(i+1)+tr("File path error")+":"+path)
+                return (None, None)
+            return ("kfpkg", path)
         for i in range(len(self.fileSelectWidgets)):
             if self.fileSelectWidgets[i][0] == "bin":
                 path = self.fileSelectWidget_Path(i).text().strip()
@@ -394,25 +408,78 @@ class MainWindow(QMainWindow):
                     continue
                 if not os.path.exists(path):
                     self.errorSignal.emit(tr("Error"), tr("Line {}: ").format(i+1)+tr("File path error")+":"+path)
-                    return
+                    return (None, None)
                 try:
                     addr = int(self.fileSelectWidgets[i][4].text(), 16)
                 except Exception:
                     self.errorSignal.emit(tr("Error"), tr("Line {}: ").format(i+1)+tr("Address error")+self.fileSelectWidgets[i][4].text())
-                    return
+                    return (None, None)
                 files.append( (path, addr, self.fileSelectWidgets[i][6].isChecked()) )
-        kfpkg = {"version": "0.1.0", "files": []}
-        for path, addr, prefix in files:
+        return ("bin", files)
+
+    class KFPKG():
+        def __init__(self):
+            self.fileInfo = {"version": "0.1.0", "files": []}
+            self.filePath = {}
+            self.burnAddr = []
+        
+        def addFile(self, addr, path, prefix=False):
+            if not os.path.exists(path):
+                raise ValueError(tr("FilePathError"))
+            if addr in self.burnAddr:
+                raise ValueError(tr("Burn dddr duplicate")+":0x%06x" %(addr))
             f = {}
             f_name = os.path.split(path)[1]
             f["address"] = addr
             f["bin"] = f_name
             f["sha256Prefix"] = prefix
-            kfpkg["files"].append(f)
-            files_path.append(path)
-        kfpkg_json = json.dumps(kfpkg, indent=4)
-        # print(kfpkg_json)
+            self.fileInfo["files"].append(f)
+            self.filePath[f_name] = path
+            self.burnAddr.append(addr)
 
+        def listDumps(self):
+            kfpkg_json = json.dumps(self.fileInfo, indent=4)
+            return kfpkg_json
+
+        def listDump(self, path):
+            with open(path, "w") as f:
+                f.write(json.dumps(self.fileInfo, indent=4))
+
+        def listLoads(self, kfpkgJson):
+            self.fileInfo = json.loads(kfpkgJson)
+
+        def listLload(self, path):
+            with open(path) as f:
+                self.fileInfo = json.load(f)
+
+        def save(self, path):
+            listName = "kflash_gui_tmp_list.json"
+            self.listDump(listName)
+            try:
+                with zipfile.ZipFile(path, "w") as zip:
+                    for name,path in self.filePath.items():
+                        zip.write(path, arcname=name, compress_type=zipfile.ZIP_LZMA)
+                    zip.write(listName, arcname="flash-list.json", compress_type=zipfile.ZIP_LZMA)
+                    zip.close()
+            except Exception as e:
+                os.remove(listName)
+                raise e
+            os.remove(listName)
+        
+
+    def packFile(self):
+        # generate flash-list.json
+        fileType, files = self.getBurnFilesInfo()
+        if not fileType or not files or fileType=="kfpkg":
+            self.errorSignal.emit(tr("Error"), tr("File path error"))
+            return
+        kfpkg = self.KFPKG()
+        try:
+            for path, addr, prefix in files:
+                kfpkg.addFile(addr, path, prefix)
+        except Exception as e:
+            self.errorSignal.emit(tr("Error"), tr("Pack kfpkg fail")+":"+str(e))
+            return
         # select saving path
         if not os.path.exists(self.saveKfpkDir):
             self.saveKfpkDir = os.getcwd()
@@ -430,30 +497,20 @@ class MainWindow(QMainWindow):
         # print("save to ", fileName_choose)
         
         # write kfpkg file
-        tmp = self.saveKfpkDir+"/flash-list.json"
-        f = open(tmp, "w")
-        f.write(kfpkg_json)
-        f.close()
-        files_path.append(tmp)
-        resZipfile = self.saveZipFile(fileName_choose, files_path)
-        os.remove(tmp)
-        if resZipfile != True:
-            self.errorSignal.emit(tr("Error"), tr("Pack kfpkg fail")+":"+str(resZipfile[1]))
+        try:
+            kfpkg.save(fileName_choose)
+        except Exception as e:
+            self.errorSignal.emit(tr("Error"), tr("Pack kfpkg fail")+":"+str(e))
             return
         self.hintSignal.emit(tr("Success"), tr("Save kfpkg success"))
 
-    def saveZipFile(self, filename, files):
-        try:
-            zip = zipfile.ZipFile(filename, "w")
-            for f in files:
-                zip.write(f, arcname=os.path.split(f)[1], compress_type=zipfile.ZIP_LZMA)
-            zip.close()
-        except Exception as e:
-            return (False,e)
-        return True
-
     def selectFile(self, index):
-        oldPath = self.fileSelectWidget_Path(index).text()
+        tmp = index
+        while tmp>=0:
+            oldPath = self.fileSelectWidget_Path(tmp).text()
+            if oldPath != "":
+                break
+            tmp -= 1
         if oldPath=="":
             oldPath = os.getcwd()
         fileName_choose, filetype = QFileDialog.getOpenFileName(self,  
@@ -620,9 +677,26 @@ class MainWindow(QMainWindow):
         if self.burning:
             self.terminateBurn()
             return
-
+        tmpFile = ""
+        fileType, filesInfo = self.getBurnFilesInfo()
+        if not fileType or not filesInfo:
+            self.errorSignal.emit(tr("Error"), tr("File path error"))
+            return
+        if fileType == "kfpkg":
+            filename = filesInfo
+        else:#generate kfpkg
+            tmpFile = "kflash_gui_tmp.kfpkg"
+            kfpkg = self.KFPKG()
+            try:
+                for path, addr, prefix in filesInfo:
+                    kfpkg.addFile(addr, path, prefix)
+                kfpkg.save(tmpFile)
+            except Exception as e:
+                self.errorSignal.emit(tr("Error"), tr("Pack kfpkg fail")+":"+str(e))
+                return
+            filename = os.path.abspath(tmpFile)
+        
         self.burning = True
-        filename = self.filePathWidget.text()
         # if not self.checkFileName(filename):
         #     self.errorSignal.emit(tr("Error"), tr("FilePathError"))
         #     self.burning = False
@@ -681,11 +755,11 @@ class MainWindow(QMainWindow):
         hint = "<font color=%s>%s</font>" %("#ff0d0d", tr("DownloadStart"))
         self.progressHint.setText(hint)
         # download
-        self.burnThread = threading.Thread(target=self.flashBurnProcess, args=(dev, baud, board, sram, filename, self.progress, color,))
+        self.burnThread = threading.Thread(target=self.flashBurnProcess, args=(dev, baud, board, sram, filename, self.progress, tmpFile!="", color,))
         self.burnThread.setDaemon(True)
         self.burnThread.start()
 
-    def flashBurnProcess(self, dev, baud, board, sram, filename, callback, color):
+    def flashBurnProcess(self, dev, baud, board, sram, filename, callback, cleanFile, color):
         success = True
         errMsg = ""
         try:
@@ -697,6 +771,8 @@ class MainWindow(QMainWindow):
             errMsg = str(e)
             if str(e) != "Burn SRAM OK":
                 success = False
+        if cleanFile:
+            os.remove(filename)
         if success:
             self.downloadResultSignal.emit(True, errMsg)
         else:

@@ -80,5 +80,6 @@
     "Line {}: ": "第 {} 行: ",
     "Save kfpkg success": "保存 kfpkg 成功",
     "Save File": "保存文件",
-    "Pack kfpkg fail": "打包 kfpkg 失败"
+    "Pack kfpkg fail": "打包 kfpkg 失败",
+    "Burn dddr duplicate": "烧录地址重复"
 }

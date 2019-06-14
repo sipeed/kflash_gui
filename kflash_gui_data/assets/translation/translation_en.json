@@ -80,5 +80,6 @@
     "Line {}: ": "Line {}: ",
     "Save kfpkg success": "Save kfpkg success",
     "Save File": "Save File",
-    "Pack kfpkg fail": "Pack kfpkg fail"
+    "Pack kfpkg fail": "Pack kfpkg fail",
+    "Burn dddr duplicate": "Burn dddr duplicate"
 }
