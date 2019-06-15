@@ -43,6 +43,21 @@ Cross platform GUI wrapper for [kflash.py](https://github.com/sipeed/kflash.py.g
 * Select baudrate, `1.5M` recommend
 * Click Download to burn firmware or model to board
 
+or you can run source code by command:
+
+```shell
+sudo apt install python3 python3-pip
+sudo pip3 install -r requirements.txt
+python3 kflash_gui.py
+```
+
+and pack execution package by command:
+
+```shell
+python3 pack.py
+```
+
+
 ## If download fail
 
 * Check hardware connection
