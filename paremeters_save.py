@@ -1,6 +1,6 @@
 import translation, parameters
 from translation import tr_en
-import json
+import json, os
 
 
 class ParametersToSave:
@@ -20,6 +20,12 @@ class ParametersToSave:
     
     def save(self, path):
         data = {}
+        rm = []
+        for f in self.files:
+            if f[0]=="" or not os.path.exists(f[0]):
+               rm.append(f) 
+        for f in rm:
+            self.files.remove(f)
         data["files"] = self.files
         data["board"] = self.board
         data["burn_pos"] = self.burnPosition
