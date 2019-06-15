@@ -1,0 +1,5 @@
+bs4==0.0.1
+PyQt5==5.12.2
+pyserial==3.4
+requests==2.18.4
+urllib3==1.22
