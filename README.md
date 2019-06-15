@@ -54,6 +54,7 @@ python3 kflash_gui.py
 and pack execution package by command:
 
 ```shell
+sudo pip3 install pyinstaller
 python3 pack.py
 ```
 
