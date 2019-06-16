@@ -116,6 +116,20 @@ QWidget {
 .menuItem5:hover {
     border-image: url("$DataPath/assets/wave-white.png")
 }
+
+.remove_file_selection {
+    min-height:27px;
+    height:27px;
+    min-width:27px;
+    width:27px;
+    background-color: white;
+    border-image: url("$DataPath/assets/close.png")
+}
+
+.remove_file_selection:hover {
+    border-image: url("$DataPath/assets/close2.png")
+}
+
 .settingWidget QComboBox{
     width:200px;
 }

@@ -277,6 +277,9 @@ class MainWindow(QMainWindow):
     
     def fileSelectWidget_Prefix(self, index):
         return self.fileSelectWidgets[index][6]
+    
+    def fileSelectWidget_Close(self, index):
+        return self.fileSelectWidgets[index][7]
 
     # @QtCore.pyqtSlot(str)
     def indexChanged_lambda(self, obj):
@@ -291,8 +294,32 @@ class MainWindow(QMainWindow):
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
+    def removeFileSelection(self, button):
+        index = -1
+        for i in range(len(self.fileSelectWidgets)):
+            if len(self.fileSelectWidgets[i]) >= 8:
+                if self.fileSelectWidget_Close(i) == button:
+                    index = i
+        print(index)
+        if index == -1:
+            return
+        if len(self.fileSelectWidgets) > 2:
+            self.fileSelectWidget_Button(index).clicked.disconnect()
+            self.fileSelectWidget_Close(index).clicked.disconnect()
+            self.fileSelectWidget_Widget(index).setParent(None)
+            self.fileSelectWidgets.remove(self.fileSelectWidgets[index])
+        if len(self.fileSelectWidgets) == 2:
+            self.fileSelectWidget_Close(0).clicked.disconnect()
+            self.fileSelectWidget_Close(0).setParent(None)
+            self.fileSelectWidgets[0].remove(self.fileSelectWidget_Close(0))
 
     def addAddFileWidget(self):
+        if len(self.fileSelectWidgets) == 2:
+            removeButton0 = QPushButton()
+            removeButton0.setProperty("class", "remove_file_selection")
+            self.fileSelectWidgets[0][2].addWidget(removeButton0)
+            self.fileSelectWidgets[0].append(removeButton0)
+            removeButton0.clicked.connect(lambda:self.removeFileSelection(removeButton0))
         oneFilePathWidget = QWidget()
         oneFilePathWidgetLayout = QHBoxLayout()
         oneFilePathWidget.setLayout(oneFilePathWidgetLayout)
@@ -300,18 +327,23 @@ class MainWindow(QMainWindow):
         fileBurnAddrWidget = QLineEdit("0x00000")
         fileBurnEncCheckbox = QCheckBox(tr("Prefix"))
         openFileButton = QPushButton(tr("OpenFile"))
+        removeButton = QPushButton()
+        removeButton.setProperty("class", "remove_file_selection")
         oneFilePathWidgetLayout.addWidget(filePathWidget)
         oneFilePathWidgetLayout.addWidget(fileBurnAddrWidget)
         oneFilePathWidgetLayout.addWidget(fileBurnEncCheckbox)
         oneFilePathWidgetLayout.addWidget(openFileButton)
+        oneFilePathWidgetLayout.addWidget(removeButton)
         oneFilePathWidgetLayout.setStretch(0, 4)
         oneFilePathWidgetLayout.setStretch(1, 2)
         oneFilePathWidgetLayout.setStretch(2, 1)
         oneFilePathWidgetLayout.setStretch(3, 2)
+        # oneFilePathWidgetLayout.setStretch(4, 1)
         index = len(self.fileSelectWidgets)-1
-        self.fileSelectWidgets.insert(index, ["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox])
+        self.fileSelectWidgets.insert(index, ["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox, removeButton])
         self.fileSelectLayout.insertWidget(index, oneFilePathWidget)
         openFileButton.clicked.connect(lambda:self.selectFile(index))
+        removeButton.clicked.connect(lambda:self.removeFileSelection(removeButton))
 
     def fileSelectShowKfpkg(self, index, name):
         if index==0 and self.fileSelectWidget_Type(0) == "kfpkg": #only one kgpkg before
@@ -341,7 +373,7 @@ class MainWindow(QMainWindow):
             filePathWidget.setText(name)
             # TODO: resize window
 
-    def fileSelectShowBin(self, index, name, addr=None, prefix=None, prefixAuto=False ):
+    def fileSelectShowBin(self, index, name, addr=None, prefix=None, prefixAuto=False, closeButton=False ):
         if index==0 and self.fileSelectWidget_Type(0) == "kfpkg": #only one kgpkg before
             self.fileSelectWidget_Button(index).clicked.disconnect()
             # self.fileSelectLayout.removeWidget(self.fileSelectWidget_Widget(index))
@@ -354,17 +386,28 @@ class MainWindow(QMainWindow):
             fileBurnAddrWidget = QLineEdit("0x00000")
             fileBurnEncCheckbox = QCheckBox(tr("Prefix"))
             openFileButton = QPushButton(tr("OpenFile"))
+            if closeButton:
+                removeButton = QPushButton()
+                removeButton.setProperty("class", "remove_file_selection")
             oneFilePathWidgetLayout.addWidget(filePathWidget)
             oneFilePathWidgetLayout.addWidget(fileBurnAddrWidget)
             oneFilePathWidgetLayout.addWidget(fileBurnEncCheckbox)
             oneFilePathWidgetLayout.addWidget(openFileButton)
+            if closeButton:
+                oneFilePathWidgetLayout.addWidget(removeButton)
             oneFilePathWidgetLayout.setStretch(0, 4)
             oneFilePathWidgetLayout.setStretch(1, 2)
             oneFilePathWidgetLayout.setStretch(2, 1)
             oneFilePathWidgetLayout.setStretch(3, 2)
+            # oneFilePathWidgetLayout.setStretch(4, 1)
             self.fileSelectLayout.addWidget(oneFilePathWidget)
-            self.fileSelectWidgets.append(["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox])
             openFileButton.clicked.connect(lambda:self.selectFile(index))
+            if closeButton:
+                self.fileSelectWidgets.append(["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox, removeButton])
+                removeButton.clicked.connect(lambda:self.removeFileSelection(removeButton))
+                print(removeButton)
+            else:
+                self.fileSelectWidgets.append(["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox])
             # add ADD button
             addoneWidget = QWidget()
             addoneWidgetLayout = QHBoxLayout()
@@ -526,7 +569,7 @@ class MainWindow(QMainWindow):
         if self.isKfpkg(fileName_choose):
             self.fileSelectShowKfpkg(index, fileName_choose)
         else:
-            self.fileSelectShowBin(index, fileName_choose, prefixAuto=True)
+            self.fileSelectShowBin(index, fileName_choose, prefixAuto=True, closeButton=False)
 
     def errorHint(self, title, str):
         QMessageBox.critical(self, title, str)
@@ -616,7 +659,11 @@ class MainWindow(QMainWindow):
                 prefix = None if (not prefix) else True
                 if index!=0:
                     self.addAddFileWidget()
-                self.fileSelectShowBin(index, path, addr, prefix)
+                if pathLen > 1 and index != 0:
+                    closeButton = True
+                else:
+                    closeButton = False
+                self.fileSelectShowBin(index, path, addr, prefix, closeButton=closeButton)
                 index += 1
         self.boardCombobox.setCurrentText(self.param.board)
         self.burnPositionCombobox.setCurrentText(self.param.burnPosition)
