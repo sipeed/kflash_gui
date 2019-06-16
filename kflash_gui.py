@@ -235,7 +235,7 @@ class MainWindow(QMainWindow):
         self.skinButton.clicked.connect(self.skinChange)
         self.aboutButton.clicked.connect(self.showAbout)
         self.downloadButton.clicked.connect(self.download)
-        self.fileSelectWidget_Button(0).clicked.connect(lambda:self.selectFile(0))
+        self.fileSelectWidget_Button(0).clicked.connect(lambda:self.selectFile(self.fileSelectWidget_Path(0)))
 
         self.myObject=MyClass(self)
         slotLambda = lambda: self.indexChanged_lambda(self.myObject)
@@ -342,7 +342,7 @@ class MainWindow(QMainWindow):
         index = len(self.fileSelectWidgets)-1
         self.fileSelectWidgets.insert(index, ["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox, removeButton])
         self.fileSelectLayout.insertWidget(index, oneFilePathWidget)
-        openFileButton.clicked.connect(lambda:self.selectFile(index))
+        openFileButton.clicked.connect(lambda:self.selectFile(filePathWidget))
         removeButton.clicked.connect(lambda:self.removeFileSelection(removeButton))
 
     def fileSelectShowKfpkg(self, index, name):
@@ -369,7 +369,7 @@ class MainWindow(QMainWindow):
             oneFilePathWidgetLayout.setStretch(1, 1)
             self.fileSelectLayout.addWidget(oneFilePathWidget)
             self.fileSelectWidgets.append(["kfpkg", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, None, openFileButton])
-            openFileButton.clicked.connect(lambda:self.selectFile(0))
+            openFileButton.clicked.connect(lambda:self.selectFile(filePathWidget))
             filePathWidget.setText(name)
             # TODO: resize window
 
@@ -401,7 +401,7 @@ class MainWindow(QMainWindow):
             oneFilePathWidgetLayout.setStretch(3, 2)
             # oneFilePathWidgetLayout.setStretch(4, 1)
             self.fileSelectLayout.addWidget(oneFilePathWidget)
-            openFileButton.clicked.connect(lambda:self.selectFile(index))
+            openFileButton.clicked.connect(lambda:self.selectFile(filePathWidget))
             if closeButton:
                 self.fileSelectWidgets.append(["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox, removeButton])
                 removeButton.clicked.connect(lambda:self.removeFileSelection(removeButton))
@@ -547,7 +547,14 @@ class MainWindow(QMainWindow):
             return
         self.hintSignal.emit(tr("Success"), tr("Save kfpkg success"))
 
-    def selectFile(self, index):
+    def selectFile(self, pathobj):
+        index = -1
+        for i in range(len(self.fileSelectWidgets)):
+            if len(self.fileSelectWidgets[i]) >= 4:
+                if pathobj == self.fileSelectWidget_Path(i):
+                    index = i
+        if index == -1:
+            return
         tmp = index
         while tmp>=0:
             oldPath = self.fileSelectWidget_Path(tmp).text()
