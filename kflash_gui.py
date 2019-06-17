@@ -221,7 +221,7 @@ class MainWindow(QMainWindow):
         if sys.platform == "win32":
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(parameters.appName)
         self.show()
-        print("config file path:",os.getcwd()+"/"+parameters.configFilePath)
+        print("config file path:", parameters.configFilePath)
 
     def initEvent(self):
         self.serialPortCombobox.clicked.connect(self.portComboboxClicked)
@@ -679,7 +679,10 @@ class MainWindow(QMainWindow):
         self.serailBaudrateCombobox.setCurrentIndex(self.param.baudRate)
 
     def closeEvent(self, event):
-        self.programExitSaveParameters()
+        try:
+            self.programExitSaveParameters()
+        finally:
+            event.accept()
 
     def langChange(self):
         if self.param.language == translation.language_en:

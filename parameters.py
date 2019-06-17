@@ -8,7 +8,19 @@ appIcon = "assets/logo.png"
 appLogo = "assets/logo.png"
 appLogo2 = "assets/logo2.png"
 translationPath = "assets/translation"
-configFilePath  = "kflash_gui.conf"
+configFileName  = "kflash_gui.conf"
+configFilePath  = ""
+
+if sys.platform.startswith('linux') or sys.platform.startswith('darwin') or sys.platform.startswith('freebsd'):
+    configFileDir = os.path.join(os.getenv("HOME"), ".config/kflash_gui")
+    try:
+        configFilePath = os.path.join(configFileDir, configFileName)
+        if not os.path.exists(configFileDir):
+            os.makedirs(configFileDir)
+    except:
+        pass
+else:
+    configFilePath  = os.path.join(os.getcwd(), configFileName)
 
 SipeedMaixDock    = "Sipeed Maix Dock"
 SipeedMaixBit     = "Sipeed Maix Bit"
