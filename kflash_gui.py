@@ -105,7 +105,7 @@ class MainWindow(QMainWindow):
         self.frameLayout.addWidget(self.downloadWidget)
         self.frameWidget.setLayout(self.frameLayout)
         self.setCentralWidget(self.frameWidget)
-        self.setFrameStrentch(0)
+        self.setFrameStrentch(1)
 
         # option layout
         self.langButton = QPushButton()
@@ -312,6 +312,8 @@ class MainWindow(QMainWindow):
             self.fileSelectWidget_Close(0).clicked.disconnect()
             self.fileSelectWidget_Close(0).setParent(None)
             self.fileSelectWidgets[0].remove(self.fileSelectWidget_Close(0))
+        self.downloadWidget.resize(self.downloadWidget.width(), 58)
+        self.setWindowSize()
 
     def addAddFileWidget(self):
         if len(self.fileSelectWidgets) == 2:

@@ -5,8 +5,8 @@ from translation import tr, tr_en
 
 versionMajor = 1
 versionMinor = 2
-versionDev   = 4
-date = "2019.6.16"
+versionDev   = 5
+date = "2019.6.17"
 
 def strAbout():
     pathDirList = sys.argv[0].replace("\\", "/").split("/")
