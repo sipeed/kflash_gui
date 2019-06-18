@@ -197,7 +197,6 @@ class MainWindow(QMainWindow):
         # widgets progress bar
         
         self.progressbar = QProgressBar(self.progressbarRootWidget)
-        self.progressbar.setGeometry(10, 0, 400, 40)
         self.progressbar.setValue(0)
         self.progressbarRootWidget.hide()
 
@@ -220,7 +219,9 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(icon)
         if sys.platform == "win32":
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(parameters.appName)
+        
         self.show()
+        self.progressbar.setGeometry(10, 0, self.downloadWidget.width()-25, 40)
         print("config file path:",os.getcwd()+"/"+parameters.configFilePath)
 
     def initEvent(self):
@@ -810,6 +811,7 @@ class MainWindow(QMainWindow):
         self.setFrameStrentch(1)
         self.settingWidget.hide()
         self.progressbar.setValue(0)
+        self.progressbar.setGeometry(10, 0, self.downloadWidget.width()-25, 40)
         self.progressbarRootWidget.show()
         self.progressHint.show()
         self.downloadButton.setText(tr("Cancel"))
