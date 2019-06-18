@@ -31,8 +31,19 @@ class ParametersToSave:
         data["burn_pos"] = self.burnPosition
         data["skin"] = self.skin
         data["language"] = self.language
-        with open(path, "w") as f:
-            json.dump(data, f)
+
+        dir_path = os.path.dirname(os.path.realpath(path))
+        try:
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
+        except:
+            pass
+
+        try:
+            with open(path, "w+") as f:
+                json.dump(data, f)
+        except:
+            pass
     
     def load(self, path):
         try:

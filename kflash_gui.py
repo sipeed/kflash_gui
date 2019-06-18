@@ -1,6 +1,7 @@
 
 
-import sys,os
+import sys, os
+import tempfile
 import parameters, helpAbout, autoUpdate, paremeters_save
 import translation
 from translation import tr, tr_en
@@ -222,7 +223,7 @@ class MainWindow(QMainWindow):
         
         self.show()
         self.progressbar.setGeometry(10, 0, self.downloadWidget.width()-25, 40)
-        print("config file path:",os.getcwd()+"/"+parameters.configFilePath)
+        print("config file path:", parameters.configFilePath)
 
     def initEvent(self):
         self.serialPortCombobox.clicked.connect(self.portComboboxClicked)
@@ -499,7 +500,7 @@ class MainWindow(QMainWindow):
                 self.fileInfo = json.load(f)
 
         def save(self, path):
-            listName = "kflash_gui_tmp_list.json"
+            listName = os.path.join(tempfile.gettempdir(), "kflash_gui_tmp_list.json")
             self.listDump(listName)
             try:
                 with zipfile.ZipFile(path, "w") as zip:
@@ -511,7 +512,6 @@ class MainWindow(QMainWindow):
                 os.remove(listName)
                 raise e
             os.remove(listName)
-        
 
     def packFile(self):
         # generate flash-list.json
@@ -680,7 +680,10 @@ class MainWindow(QMainWindow):
         self.serailBaudrateCombobox.setCurrentIndex(self.param.baudRate)
 
     def closeEvent(self, event):
-        self.programExitSaveParameters()
+        try:
+            self.programExitSaveParameters()
+        finally:
+            event.accept()
 
     def langChange(self):
         if self.param.language == translation.language_en:
@@ -752,13 +755,14 @@ class MainWindow(QMainWindow):
         if fileType == "kfpkg":
             filename = filesInfo
         else:#generate kfpkg
-            tmpFile = "kflash_gui_tmp.kfpkg"
+            tmpFile = os.path.join(tempfile.gettempdir(), "kflash_gui_tmp.kfpkg")
             kfpkg = self.KFPKG()
             try:
                 for path, addr, prefix in filesInfo:
                     kfpkg.addFile(addr, path, prefix)
                 kfpkg.save(tmpFile)
             except Exception as e:
+                os.remove(tmpFile)
                 self.errorSignal.emit(tr("Error"), tr("Pack kfpkg fail")+":"+str(e))
                 return
             filename = os.path.abspath(tmpFile)
