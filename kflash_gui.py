@@ -315,7 +315,7 @@ class MainWindow(QMainWindow):
             self.fileSelectWidget_Close(0).setParent(None)
             self.fileSelectWidgets[0].remove(self.fileSelectWidget_Close(0))
         self.downloadWidget.resize(self.downloadWidget.width(), 58)
-        self.setWindowSize()
+        self.setWindowSize(self.width())
 
     def addAddFileWidget(self):
         if len(self.fileSelectWidgets) == 2:
