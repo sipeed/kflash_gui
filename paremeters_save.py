@@ -13,10 +13,11 @@ class ParametersToSave:
         self.baudRate = 2
         self.skin = 2
         self.language = translation.language_en
-        return
+        self.slowMode = True
+
 
     def __del__(self):
-        return
+        pass
     
     def save(self, path):
         data = {}
@@ -31,6 +32,7 @@ class ParametersToSave:
         data["burn_pos"] = self.burnPosition
         data["skin"] = self.skin
         data["language"] = self.language
+        data["slow_mode"] = self.slowMode
 
         dir_path = os.path.dirname(os.path.realpath(path))
         try:
@@ -51,10 +53,13 @@ class ParametersToSave:
                 data = json.load(f)
         except Exception as e:
             return
-        self.files = data["files"]
-        self.board = data["board"]
-        self.burnPosition = data["burn_pos"]
-        self.skin = data["skin"]
-        self.language = data["language"]
-
+        try:
+            self.files = data["files"]
+            self.board = data["board"]
+            self.burnPosition = data["burn_pos"]
+            self.skin = data["skin"]
+            self.language = data["language"]
+            self.slowMode = data["slow_mode"]
+        except Exception:
+            pass
 
