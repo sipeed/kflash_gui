@@ -171,7 +171,7 @@ class MainWindow(QMainWindow):
         serialSettingsLayout = QGridLayout()
         serialPortLabek = QLabel(tr("SerialPort"))
         serailBaudrateLabel = QLabel(tr("SerialBaudrate"))
-        slowModeLabel = QLabel(tr("Slow mode"))
+        slowModeLabel = QLabel(tr("Speed mode"))
         self.serialPortCombobox = ComboBox()
         self.serailBaudrateCombobox = ComboBox()
         self.serailBaudrateCombobox.addItem("115200")
@@ -183,15 +183,16 @@ class MainWindow(QMainWindow):
         self.serailBaudrateCombobox.addItem("4500000")
         self.serailBaudrateCombobox.setCurrentIndex(1)
         self.serailBaudrateCombobox.setEditable(True)
-        self.slowModeCheckbox = QCheckBox()
-        self.slowModeCheckbox.setProperty("class", "slowmodeCheckbox")
+        self.slowModeCombobox = ComboBox()
+        self.slowModeCombobox.addItem(tr("Slow mode"))
+        self.slowModeCombobox.addItem(tr("Fast mode"))
         
         serialSettingsLayout.addWidget(serialPortLabek,0,0)
         serialSettingsLayout.addWidget(serailBaudrateLabel, 1, 0)
         serialSettingsLayout.addWidget(slowModeLabel, 2, 0)
         serialSettingsLayout.addWidget(self.serialPortCombobox, 0, 1)
         serialSettingsLayout.addWidget(self.serailBaudrateCombobox, 1, 1)
-        serialSettingsLayout.addWidget(self.slowModeCheckbox, 2, 1)
+        serialSettingsLayout.addWidget(self.slowModeCombobox, 2, 1)
         serialSettingsGroupBox.setLayout(serialSettingsLayout)
         settingLayout.addWidget(serialSettingsGroupBox)
 
@@ -656,7 +657,7 @@ class MainWindow(QMainWindow):
                 except Exception:
                     continue
                 paramObj.files.append( (self.fileSelectWidget_Path(i).text(), addr, self.fileSelectWidget_Prefix(i).isChecked()) )
-        if self.slowModeCheckbox.isChecked():
+        if self.slowModeCombobox.currentIndex()==0:
             paramObj.slowMode = True
         else:
             paramObj.slowMode = False
@@ -688,9 +689,9 @@ class MainWindow(QMainWindow):
         self.burnPositionCombobox.setCurrentText(self.param.burnPosition)
         self.serailBaudrateCombobox.setCurrentIndex(self.param.baudRate)
         if self.param.slowMode:
-            self.slowModeCheckbox.setChecked(True)
+            self.slowModeCombobox.setCurrentIndex(0)
         else:
-            self.slowModeCheckbox.setChecked(False)
+            self.slowModeCombobox.setCurrentIndex(1)
 
     def closeEvent(self, event):
         try:
@@ -824,7 +825,7 @@ class MainWindow(QMainWindow):
             self.errorSignal.emit(tr("Error"), tr("PleaseSelectSerialPort"))
             self.burning = False
             return
-        slow = self.slowModeCheckbox.isChecked()
+        slow = self.slowModeCombobox.currentIndex()==0
         # hide setting widgets
         self.setFrameStrentch(1)
         self.settingWidget.hide()

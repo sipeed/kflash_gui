@@ -270,10 +270,6 @@ QPushButton:pressed {
     color: white;
 }
 
-.slowmodeCheckbox {
-    min-height:35px;
-}
-
 QPushButton:flat {
     border: none; /* no border for a flat push button */
 }

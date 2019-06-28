@@ -82,5 +82,7 @@
     "Save File": "保存文件",
     "Pack kfpkg fail": "打包 kfpkg 失败",
     "Burn dddr duplicate": "烧录地址重复",
-    "Slow mode": "低速模式"
+    "Slow mode": "低速模式",
+    "Fast mode": "高速模式",
+    "Speed mode": "速度模式"
 }

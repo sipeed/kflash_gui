@@ -82,5 +82,7 @@
     "Save File": "Save File",
     "Pack kfpkg fail": "Pack kfpkg fail",
     "Burn dddr duplicate": "Burn dddr duplicate",
-    "Slow mode": "Slow mode"
+    "Slow mode": "Slow mode",
+    "Fast mode": "Fast mode",
+    "Speed mode": "Speed mode"
 }
