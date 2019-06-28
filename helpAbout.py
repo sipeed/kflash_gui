@@ -2,11 +2,14 @@ import sys
 import parameters
 import os
 from translation import tr, tr_en
+import time
 
 versionMajor = 1
-versionMinor = 2
-versionDev   = 5
-date = "2019.6.17"
+versionMinor = 3
+versionDev   = 0
+
+time_now = time.localtime(time.time())
+date = str(time_now.tm_year)+"."+str(time_now.tm_mon)+"."+str(time_now.tm_mday)
 
 def strAbout():
     pathDirList = sys.argv[0].replace("\\", "/").split("/")
