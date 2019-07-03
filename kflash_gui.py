@@ -777,7 +777,10 @@ class MainWindow(QMainWindow):
                     kfpkg.addFile(addr, path, prefix)
                 kfpkg.save(tmpFile)
             except Exception as e:
-                os.remove(tmpFile)
+                try:
+                    os.remove(tmpFile)
+                except Exception:
+                    print("can not delete temp file:", tmpFile)
                 self.errorSignal.emit(tr("Error"), tr("Pack kfpkg fail")+":"+str(e))
                 return
             filename = os.path.abspath(tmpFile)
@@ -860,7 +863,10 @@ class MainWindow(QMainWindow):
             if str(e) != "Burn SRAM OK":
                 success = False
         if cleanFile:
-            os.remove(filename)
+            try:
+                os.remove(filename)
+            except Exception:
+                print("Can not delete tmp file:", filename)
         if success:
             self.downloadResultSignal.emit(True, errMsg)
         else:
