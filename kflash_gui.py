@@ -747,7 +747,8 @@ class MainWindow(QMainWindow):
     def updateProgressPrint(self, str):
         self.statusBarStauts.setText(str)
 
-    def kflash_py_printCallback(self, *args, end = "\n"):
+    def kflash_py_printCallback(self, *args, **kwargs):
+        # end = kwargs.pop('end', "\n")
         msg = ""
         for i in args:
             msg += str(i)
