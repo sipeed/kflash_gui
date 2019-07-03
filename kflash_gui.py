@@ -511,8 +511,8 @@ class MainWindow(QMainWindow):
             try:
                 with zipfile.ZipFile(path, "w") as zip:
                     for name,path in self.filePath.items():
-                        zip.write(path, arcname=name, compress_type=zipfile.ZIP_LZMA)
-                    zip.write(listName, arcname="flash-list.json", compress_type=zipfile.ZIP_LZMA)
+                        zip.write(path, arcname=name, compress_type=zipfile.ZIP_DEFLATED)
+                    zip.write(listName, arcname="flash-list.json", compress_type=zipfile.ZIP_DEFLATED)
                     zip.close()
             except Exception as e:
                 os.remove(listName)
