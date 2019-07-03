@@ -6,7 +6,7 @@ import time
 
 versionMajor = 1
 versionMinor = 3
-versionDev   = 0
+versionDev   = 1
 
 time_now = time.localtime(time.time())
 date = str(time_now.tm_year)+"."+str(time_now.tm_mon)+"."+str(time_now.tm_mday)
