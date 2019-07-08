@@ -57,6 +57,7 @@ class MainWindow(QMainWindow):
         self.DataPath = parameters.dataPath
         self.kflash = KFlash(print_callback=self.kflash_py_printCallback)
         self.saveKfpkDir = ""
+        self.packing = False
 
     def setWindowSize(self, w=520, h=550):
         self.resize(w, h)
@@ -520,18 +521,17 @@ class MainWindow(QMainWindow):
             os.remove(listName)
 
     def packFile(self):
-        # generate flash-list.json
+        if self.packing:
+            self.hintSignal.emit(tr("Error"), tr("Please wait, packing ..."))
+            return
+        self.packing = True
+
         fileType, files = self.getBurnFilesInfo()
         if not fileType or not files or fileType=="kfpkg":
             self.errorSignal.emit(tr("Error"), tr("File path error"))
+            self.packing = False
             return
-        kfpkg = self.KFPKG()
-        try:
-            for path, addr, prefix in files:
-                kfpkg.addFile(addr, path, prefix)
-        except Exception as e:
-            self.errorSignal.emit(tr("Error"), tr("Pack kfpkg fail")+":"+str(e))
-            return
+        
         # select saving path
         if not os.path.exists(self.saveKfpkDir):
             self.saveKfpkDir = os.getcwd()
@@ -539,22 +539,39 @@ class MainWindow(QMainWindow):
                                     tr("Save File"),  
                                     self.saveKfpkDir,
                                     "k210 packages (*.kfpkg)")
-
         if fileName_choose == "":
             self.errorSignal.emit(tr("Error"), tr("File path error"))
+            self.packing = False
             return
         if not fileName_choose.endswith(".kfpkg"):
             fileName_choose += ".kfpkg"
         self.saveKfpkDir = os.path.split(fileName_choose)[0]
-        # print("save to ", fileName_choose)
-        
-        # write kfpkg file
+
+        # pack and save
+        t = threading.Thread(target=self.packFileProccess, args=(files, fileName_choose,))
+        t.setDaemon(True)
+        t.start()
+    
+    def packFileProccess(self, files, fileSaveName):
+        # generate flash-list.json
+        kfpkg = self.KFPKG()
         try:
-            kfpkg.save(fileName_choose)
+            for path, addr, prefix in files:
+                kfpkg.addFile(addr, path, prefix)
         except Exception as e:
             self.errorSignal.emit(tr("Error"), tr("Pack kfpkg fail")+":"+str(e))
+            self.packing = False
+            return
+
+        # write kfpkg file
+        try:
+            kfpkg.save(fileSaveName)
+        except Exception as e:
+            self.errorSignal.emit(tr("Error"), tr("Pack kfpkg fail")+":"+str(e))
+            self.packing = False
             return
         self.hintSignal.emit(tr("Success"), tr("Save kfpkg success"))
+        self.packing = False
 
     def selectFile(self, pathobj):
         index = -1
@@ -762,29 +779,11 @@ class MainWindow(QMainWindow):
         if self.burning:
             self.terminateBurn()
             return
-        tmpFile = ""
         fileType, filesInfo = self.getBurnFilesInfo()
         if not fileType or not filesInfo:
             self.errorSignal.emit(tr("Error"), tr("File path error"))
             return
-        if fileType == "kfpkg":
-            filename = filesInfo
-        else:#generate kfpkg
-            tmpFile = os.path.join(tempfile.gettempdir(), "kflash_gui_tmp.kfpkg")
-            kfpkg = self.KFPKG()
-            try:
-                for path, addr, prefix in filesInfo:
-                    kfpkg.addFile(addr, path, prefix)
-                kfpkg.save(tmpFile)
-            except Exception as e:
-                try:
-                    os.remove(tmpFile)
-                except Exception:
-                    print("can not delete temp file:", tmpFile)
-                self.errorSignal.emit(tr("Error"), tr("Pack kfpkg fail")+":"+str(e))
-                return
-            filename = os.path.abspath(tmpFile)
-        
+
         self.burning = True
         # if not self.checkFileName(filename):
         #     self.errorSignal.emit(tr("Error"), tr("FilePathError"))
@@ -846,23 +845,43 @@ class MainWindow(QMainWindow):
         hint = "<font color=%s>%s</font>" %("#ff0d0d", tr("DownloadStart"))
         self.progressHint.setText(hint)
         # download
-        self.burnThread = threading.Thread(target=self.flashBurnProcess, args=(dev, baud, board, sram, filename, self.progress, tmpFile!="", color, slow))
+        self.burnThread = threading.Thread(target=self.flashBurnProcess, args=(dev, baud, board, sram, fileType, filesInfo, self.progress, color, slow))
         self.burnThread.setDaemon(True)
         self.burnThread.start()
 
-    def flashBurnProcess(self, dev, baud, board, sram, filename, callback, cleanFile, color, slow):
+    def flashBurnProcess(self, dev, baud, board, sram, fileType, files, callback, color, slow):
         success = True
         errMsg = ""
-        try:
-            if board:
-                self.kflash.process(terminal=False, dev=dev, baudrate=baud, board=board, sram = sram, file=filename, callback=callback, noansi=not color, slow_mode=slow)
-            else:
-                self.kflash.process(terminal=False, dev=dev, baudrate=baud, sram = sram, file=filename, callback=callback, noansi=not color, slow_mode=slow)
-        except Exception as e:
-            errMsg = str(e)
-            if str(e) != "Burn SRAM OK":
+        tmpFile = ""
+
+        if fileType == "kfpkg":
+            filename = files
+        else:#generate kfpkg
+            tmpFile = os.path.join(tempfile.gettempdir(), "kflash_gui_tmp.kfpkg")
+            kfpkg = self.KFPKG()
+            try:
+                for path, addr, prefix in files:
+                    kfpkg.addFile(addr, path, prefix)
+                kfpkg.save(tmpFile)
+                filename = os.path.abspath(tmpFile)
+            except Exception as e:
+                try:
+                    os.remove(tmpFile)
+                except Exception:
+                    print("can not delete temp file:", tmpFile)
+                errMsg = tr("Pack kfpkg fail")+":"+str(e)
                 success = False
-        if cleanFile:
+        if success:
+            try:
+                if board:
+                    self.kflash.process(terminal=False, dev=dev, baudrate=baud, board=board, sram = sram, file=filename, callback=callback, noansi=not color, slow_mode=slow)
+                else:
+                    self.kflash.process(terminal=False, dev=dev, baudrate=baud, sram = sram, file=filename, callback=callback, noansi=not color, slow_mode=slow)
+            except Exception as e:
+                errMsg = str(e)
+                if str(e) != "Burn SRAM OK":
+                    success = False
+        if tmpFile != "":
             try:
                 os.remove(filename)
             except Exception:
@@ -871,6 +890,7 @@ class MainWindow(QMainWindow):
             self.downloadResultSignal.emit(True, errMsg)
         else:
             self.downloadResultSignal.emit(False, errMsg)
+        self.burning = False
             
 
     def downloadResult(self, success, msg):
