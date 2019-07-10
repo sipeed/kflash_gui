@@ -85,5 +85,7 @@
     "Slow mode": "低速模式",
     "Fast mode": "高速模式",
     "Speed mode": "速度模式",
-    "Please wait, packing ...": "正在打包，请稍后 ..."
+    "Please wait, packing ...": "正在打包，请稍后 ...",
+    "Upgrade": "升级",
+    "Upgrade available, please download new release in release page": "发现新版本，请在 release 页面下载最新的版本"
 }

@@ -85,5 +85,7 @@
     "Slow mode": "Slow mode",
     "Fast mode": "Fast mode",
     "Speed mode": "Speed mode",
-    "Please wait, packing ...": "Please wait, packing ..."
+    "Please wait, packing ...": "Please wait, packing ...",
+    "Upgrade": "Upgrade",
+    "Upgrade available, please download new release in release page": "Upgrade available, please download new release in release page"
 }

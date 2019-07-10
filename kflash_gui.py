@@ -747,6 +747,7 @@ class MainWindow(QMainWindow):
     def autoUpdateDetect(self):
         auto = autoUpdate.AutoUpdate()
         if auto.detectNewVersion():
+            self.hintSignal.emit(tr("Upgrade"), tr("Upgrade available, please download new release in release page"))
             auto.OpenBrowser()
 
     def openDevManagement(self):
