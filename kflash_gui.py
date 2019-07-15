@@ -4,7 +4,7 @@ import sys, os
 import tempfile
 import parameters, helpAbout, autoUpdate, paremeters_save
 import translation
-from translation import tr, tr_en
+from translation import tr, tr_en, tr2
 from Combobox import ComboBox
 import json, zipfile
 
@@ -187,6 +187,8 @@ class MainWindow(QMainWindow):
         self.slowModeCombobox = ComboBox()
         self.slowModeCombobox.addItem(tr("Slow mode"))
         self.slowModeCombobox.addItem(tr("Fast mode"))
+        slowModeLabel.setToolTip(tr("slow mode tips"))
+        self.slowModeCombobox.setToolTip(tr("slow mode tips"))
         
         serialSettingsLayout.addWidget(serialPortLabek,0,0)
         serialSettingsLayout.addWidget(serailBaudrateLabel, 1, 0)
@@ -309,7 +311,6 @@ class MainWindow(QMainWindow):
             if len(self.fileSelectWidgets[i]) >= 8:
                 if self.fileSelectWidget_Close(i) == button:
                     index = i
-        print(index)
         if index == -1:
             return
         if len(self.fileSelectWidgets) > 2:
@@ -337,6 +338,7 @@ class MainWindow(QMainWindow):
         filePathWidget = QLineEdit()
         fileBurnAddrWidget = QLineEdit("0x00000")
         fileBurnEncCheckbox = QCheckBox(tr("Prefix"))
+        fileBurnEncCheckbox.setToolTip(tr("bin prefix tips"))
         openFileButton = QPushButton(tr("OpenFile"))
         removeButton = QPushButton()
         removeButton.setProperty("class", "remove_file_selection")
@@ -396,6 +398,7 @@ class MainWindow(QMainWindow):
             filePathWidget = QLineEdit()
             fileBurnAddrWidget = QLineEdit("0x00000")
             fileBurnEncCheckbox = QCheckBox(tr("Prefix"))
+            fileBurnEncCheckbox.setToolTip(tr("bin prefix tips"))
             openFileButton = QPushButton(tr("OpenFile"))
             if closeButton:
                 removeButton = QPushButton()
@@ -416,7 +419,6 @@ class MainWindow(QMainWindow):
             if closeButton:
                 self.fileSelectWidgets.append(["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox, removeButton])
                 removeButton.clicked.connect(lambda:self.removeFileSelection(removeButton))
-                print(removeButton)
             else:
                 self.fileSelectWidgets.append(["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox])
             # add ADD button
@@ -737,12 +739,13 @@ class MainWindow(QMainWindow):
             file = open(self.DataPath + '/assets/qss/style.qss', "r")
             self.param.skin = 1
         self.app.setStyleSheet(file.read().replace("$DataPath", self.DataPath))
+        file.close()
 
     def showAbout(self):
         QMessageBox.information(self, tr("About"),"<h1 style='color:#f75a5a';margin=10px;>"+parameters.appName+
                                 '</h1><br><b style="color:#08c7a1;margin = 5px;">V'+str(helpAbout.versionMajor)+"."+
                                 str(helpAbout.versionMinor)+"."+str(helpAbout.versionDev)+
-                                "</b><br><br>"+helpAbout.date+"<br><br>"+helpAbout.strAbout())
+                                "</b><br><br>"+helpAbout.date+"<br><br>"+tr("help str")+"<br><br>"+helpAbout.strAbout())
 
     def autoUpdateDetect(self):
         auto = autoUpdate.AutoUpdate()
@@ -856,7 +859,11 @@ class MainWindow(QMainWindow):
         tmpFile = ""
 
         if fileType == "kfpkg":
-            filename = files
+            if sram:
+                errMsg = tr("only support bin file when Download to SRAM")
+                success = False
+            else:
+                filename = files
         else:#generate kfpkg
             if sram:
                 filename = files[0][0]
@@ -882,7 +889,7 @@ class MainWindow(QMainWindow):
                 else:
                     self.kflash.process(terminal=False, dev=dev, baudrate=baud, sram = sram, file=filename, callback=callback, noansi=not color, slow_mode=slow)
             except Exception as e:
-                errMsg = str(e)
+                errMsg = tr2(str(e))
                 if str(e) != "Burn SRAM OK":
                     success = False
         if tmpFile != "":
@@ -902,7 +909,7 @@ class MainWindow(QMainWindow):
             self.hintSignal.emit(tr("Success"), tr("DownloadSuccess"))
             self.statusBarStauts.setText("<font color=%s>%s</font>" %("#1aac2d", tr("DownloadSuccess")))
         else:
-            if msg == "Cancel":
+            if msg == tr("Cancel"):
                 self.statusBarStauts.setText("<font color=%s>%s</font>" %("#ff1d1d", tr("DownloadCanceled")))
             else:
                 msg = tr("ErrorSettingHint") + "\n\n"+msg
@@ -936,6 +943,7 @@ def main():
     else: #elif mainWindow.param == 2: # dark skin
         file = open(mainWindow.DataPath + '/assets/qss/style-dark.qss', "r")
     qss = file.read().replace("$DataPath",mainWindow.DataPath)
+    file.close()
     app.setStyleSheet(qss)
     mainWindow.detectSerialPort()
     t = threading.Thread(target=mainWindow.autoUpdateDetect)

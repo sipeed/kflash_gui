@@ -127,7 +127,8 @@ QWidget {
 }
 
 .remove_file_selection:hover {
-    border-image: url("$DataPath/assets/close2.png")
+    border-image: url("$DataPath/assets/close2.png");
+    background-color: white;
 }
 
 .settingWidget QComboBox{

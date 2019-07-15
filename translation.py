@@ -41,5 +41,15 @@ def tr(str):
 def tr_en(str):
     return lang_json_list[language_en][str]
 
-
-        
+def tr2(str):
+    ret = str
+    key_find = None
+    max_find_len = 0
+    for key in lang_json_list[current_lang].keys():
+        if key in str:
+            if len(key) > max_find_len:
+                key_find = key
+                max_find_len = len(key)
+    if key_find:
+        ret = ret.replace(key_find, lang_json_list[current_lang][key_find])
+    return ret
