@@ -1,7 +1,13 @@
 import translation, parameters
 from translation import tr_en
 import json, os
+import locale
 
+lang = locale.getdefaultlocale()
+if lang[0].startswith("zh"):
+    default_lang = translation.language_zh
+else:
+    default_lang = translation.language_en
 
 class ParametersToSave:
 
@@ -12,7 +18,7 @@ class ParametersToSave:
         self.burnPosition = tr_en("Flash")
         self.baudRate = 2
         self.skin = 2
-        self.language = translation.language_en
+        self.language = default_lang
         self.slowMode = True
 
 
