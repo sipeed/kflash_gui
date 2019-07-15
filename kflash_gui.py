@@ -858,20 +858,23 @@ class MainWindow(QMainWindow):
         if fileType == "kfpkg":
             filename = files
         else:#generate kfpkg
-            tmpFile = os.path.join(tempfile.gettempdir(), "kflash_gui_tmp.kfpkg")
-            kfpkg = self.KFPKG()
-            try:
-                for path, addr, prefix in files:
-                    kfpkg.addFile(addr, path, prefix)
-                kfpkg.save(tmpFile)
-                filename = os.path.abspath(tmpFile)
-            except Exception as e:
+            if sram:
+                filename = files[0][0]
+            else:
+                tmpFile = os.path.join(tempfile.gettempdir(), "kflash_gui_tmp.kfpkg")
+                kfpkg = self.KFPKG()
                 try:
-                    os.remove(tmpFile)
-                except Exception:
-                    print("can not delete temp file:", tmpFile)
-                errMsg = tr("Pack kfpkg fail")+":"+str(e)
-                success = False
+                    for path, addr, prefix in files:
+                        kfpkg.addFile(addr, path, prefix)
+                    kfpkg.save(tmpFile)
+                    filename = os.path.abspath(tmpFile)
+                except Exception as e:
+                    try:
+                        os.remove(tmpFile)
+                    except Exception:
+                        print("can not delete temp file:", tmpFile)
+                    errMsg = tr("Pack kfpkg fail")+":"+str(e)
+                    success = False
         if success:
             try:
                 if board:
