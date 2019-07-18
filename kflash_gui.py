@@ -38,6 +38,7 @@ class MainWindow(QMainWindow):
     downloadResultSignal = pyqtSignal(bool, str)
     DataPath = "./"
     app = None
+    firmware_start_bytes = [b'\x21\xa8', b'\xef\xbe', b'\xad\xde']
 
     def __init__(self,app):
         super().__init__()
@@ -437,10 +438,16 @@ class MainWindow(QMainWindow):
         self.fileSelectWidget_Path(index).setText(name)
 
         if prefixAuto:
+            prefixCheck = False
             if name.endswith(".bin"):
-                self.fileSelectWidget_Prefix(index).setChecked(True)
-            else:
-                self.fileSelectWidget_Prefix(index).setChecked(False)
+                f = open(name, "rb")
+                start_bytes = f.read(6)
+                f.close()                
+                for flags in self.firmware_start_bytes:
+                    if flags in start_bytes:
+                        prefixCheck = True
+            self.fileSelectWidget_Prefix(index).setChecked(prefixCheck)
+                
         elif prefix:
             self.fileSelectWidget_Prefix(index).setChecked(True)
         if addr:
