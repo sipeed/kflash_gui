@@ -76,6 +76,8 @@
     "Add File": "增加文件",
     "Pack to kfpkg": "打包为 kfpkg",
     "Prefix": "校验头",
+    "Firmware": "固件",
+    "Busy": "忙",
     "Address error": "地址错误",
     "Line {}: ": "第 {} 行: ",
     "Save kfpkg success": "保存 kfpkg 成功",
@@ -95,5 +97,11 @@
     "Connection disconnected, try again or maybe need use Slow mode, or decrease baudrate": "连接断开， 请重试 或者 检查串口设置，也许需要使用 低速模式 或者 降低波特率 ",
     "slow mode tips": "<b>低速模式</b>： 以较慢的速度下载 bootloader，速度慢但是更稳定<br><b>高速模式</b>： 以更高速度下载 bootloader ，速度快但是稳定性更低",
     "bin prefix tips": "<b>校验头</b>: 如果是 .bin 格式的<b>固件</b> ，必须<b>勾选</b>，其它文件不能勾选",
-    "help str":"-----------------------------------------<br><b>固件下载</b>:<br><b>-></b> 选择固件(支持 .kfpkg 和 .bin)， 如果固件是.bin格式，则需要勾选校验头<br><b>-></b> 选择开发板，选择下载到 Flash<br><b>-></b> 设置串口，速度推荐1500000，如果下载失败，请尝试低速模式及确认串口有没有选错或降低波特率<br><br><b>其它下载</b>：<br>和固件下载类似，但是不能勾选校验头，否则会出问题<br>-----------------------------------------"
+    "help str":"-----------------------------------------<br><b>固件下载</b>:<br><b>-></b> 选择固件(支持 .kfpkg 和 .bin)， 如果固件是.bin格式，则需要勾选校验头<br><b>-></b> 选择开发板，选择下载到 Flash<br><b>-></b> 设置串口，速度推荐1500000，如果下载失败，请尝试低速模式及确认串口有没有选错或降低波特率<br><br><b>其它下载</b>：<br>和固件下载类似，但是不能勾选校验头，否则会出问题<br>-----------------------------------------",
+    "Merge to .bin": "合并成.bin",
+    "File address error": "文件地址错误",
+    "start from": "开始于",
+    "but file": "但是文件",
+    "address range is": "地址范围为"
+
 }

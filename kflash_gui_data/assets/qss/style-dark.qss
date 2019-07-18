@@ -292,6 +292,24 @@ QLineEdit {
     height: 40px;
 }
 
+.qLineEditNormal {
+    border: 1px solid #3a3a3a;
+    border-radius: 5px;
+    padding: 0 8px;
+    background: #3a3a3a;
+    selection-background-color: #373277;
+    height: 40px;
+}
+
+.qLineEditHighlight {
+    border: 1px solid #3a3a3a;
+    border-radius: 5px;
+    padding: 0 8px;
+    background: #00143a;
+    selection-background-color: #373277;
+    height: 40px;
+}
+
 QCheckBox {
 }
 

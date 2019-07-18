@@ -338,8 +338,9 @@ class MainWindow(QMainWindow):
         oneFilePathWidget.setLayout(oneFilePathWidgetLayout)
         filePathWidget = QLineEdit()
         fileBurnAddrWidget = QLineEdit("0x00000")
-        fileBurnEncCheckbox = QCheckBox(tr("Prefix"))
+        fileBurnEncCheckbox = QCheckBox(tr("Firmware"))
         fileBurnEncCheckbox.setToolTip(tr("bin prefix tips"))
+        fileBurnEncCheckbox.hide()
         openFileButton = QPushButton(tr("OpenFile"))
         removeButton = QPushButton()
         removeButton.setProperty("class", "remove_file_selection")
@@ -387,6 +388,16 @@ class MainWindow(QMainWindow):
             filePathWidget.setText(name)
             # TODO: resize window
 
+    def highlightFirmwarePath(self, firmware, index):
+        if firmware:
+            self.fileSelectWidget_Path(index).setProperty("class", "qLineEditHighlight")
+            self.fileSelectWidget_Addr(index).setText("0x00000")
+        else:
+            self.fileSelectWidget_Path(index).setProperty("class", "qLineEditNormal")
+        self.frameWidget.style().unpolish(self.fileSelectWidget_Path(index))
+        self.frameWidget.style().polish(self.fileSelectWidget_Path(index))
+        self.frameWidget.update()
+
     def fileSelectShowBin(self, index, name, addr=None, prefix=None, prefixAuto=False, closeButton=False ):
         if index==0 and self.fileSelectWidget_Type(0) == "kfpkg": #only one kgpkg before
             self.fileSelectWidget_Button(index).clicked.disconnect()
@@ -398,8 +409,9 @@ class MainWindow(QMainWindow):
             oneFilePathWidget.setLayout(oneFilePathWidgetLayout)
             filePathWidget = QLineEdit()
             fileBurnAddrWidget = QLineEdit("0x00000")
-            fileBurnEncCheckbox = QCheckBox(tr("Prefix"))
+            fileBurnEncCheckbox = QCheckBox(tr("Firmware"))
             fileBurnEncCheckbox.setToolTip(tr("bin prefix tips"))
+            fileBurnEncCheckbox.hide()
             openFileButton = QPushButton(tr("OpenFile"))
             if closeButton:
                 removeButton = QPushButton()
@@ -428,8 +440,10 @@ class MainWindow(QMainWindow):
             addoneWidget.setLayout(addoneWidgetLayout)
             addFileButton = QPushButton(tr("Add File"))
             packFileButton = QPushButton(tr("Pack to kfpkg"))
+            mergeFileButton = QPushButton(tr("Merge to .bin"))
             addoneWidgetLayout.addWidget(addFileButton)
             addoneWidgetLayout.addWidget(packFileButton)
+            addoneWidgetLayout.addWidget(mergeFileButton)
             self.fileSelectLayout.addWidget(addoneWidget)
             self.fileSelectWidgets.append(["button", addoneWidget, addoneWidgetLayout, addFileButton, packFileButton])
             addFileButton.clicked.connect(self.addAddFileWidget)
@@ -446,10 +460,11 @@ class MainWindow(QMainWindow):
                 for flags in self.firmware_start_bytes:
                     if flags in start_bytes:
                         prefixCheck = True
-            self.fileSelectWidget_Prefix(index).setChecked(prefixCheck)
-                
+            self.fileSelectWidget_Prefix(index).setChecked(prefixCheck)                
+            self.highlightFirmwarePath(prefixCheck, index)
         elif prefix:
             self.fileSelectWidget_Prefix(index).setChecked(True)
+            self.highlightFirmwarePath(True, index)
         if addr:
                 self.fileSelectWidget_Addr(index).setText("0x%06x" %(addr))
 
@@ -529,9 +544,24 @@ class MainWindow(QMainWindow):
                 raise e
             os.remove(listName)
 
+    def checkFilesAddrValid(self, fileType, files):
+        if fileType == "bin":
+            files.sort(key=lambda file:file[1])
+            startAddr = -1
+            fileSize  = 0
+            fileShortLast = ""
+            for file, addr, firmware in files:
+                fileShort = ".../"+"/".join(file.split("/")[-2:])
+                if startAddr + fileSize > addr:
+                    return (False, tr("File address error")+": {} {} 0x{:X}, {} {} {} [0x{:X},0x{:X}]".format(fileShort, tr("start from"), addr, tr("but file"), fileShortLast, tr("address range is"), startAddr, startAddr+fileSize) )
+                fileSize = os.path.getsize(file)
+                startAddr = addr
+                fileShortLast = fileShort
+        return (True, "")
+
     def packFile(self):
         if self.packing:
-            self.hintSignal.emit(tr("Error"), tr("Please wait, packing ..."))
+            self.hintSignal.emit(tr("Busy"), tr("Please wait, packing ..."))
             return
         self.packing = True
 
@@ -549,12 +579,17 @@ class MainWindow(QMainWindow):
                                     self.saveKfpkDir,
                                     "k210 packages (*.kfpkg)")
         if fileName_choose == "":
-            self.errorSignal.emit(tr("Error"), tr("File path error"))
+            # self.errorSignal.emit(tr("Error"), tr("File path error"))
             self.packing = False
             return
         if not fileName_choose.endswith(".kfpkg"):
             fileName_choose += ".kfpkg"
         self.saveKfpkDir = os.path.split(fileName_choose)[0]
+
+        ok, msg = self.checkFilesAddrValid(fileType, files)
+        if not ok:
+            self.errorSignal.emit(tr("Error"), msg)
+            return
 
         # pack and save
         t = threading.Thread(target=self.packFileProccess, args=(files, fileName_choose,))
