@@ -6,7 +6,7 @@ import parameters, helpAbout, autoUpdate, paremeters_save
 import translation
 from translation import tr, tr_en, tr2
 from Combobox import ComboBox
-import json, zipfile
+import json, zipfile, struct, hashlib
 
 # from COMTool.wave import Wave
 from PyQt5.QtCore import pyqtSignal,Qt
@@ -307,6 +307,9 @@ class MainWindow(QMainWindow):
         qr.moveCenter(cp)
         self.move(qr.topLeft())
     def removeFileSelection(self, button):
+        if self.packing:
+            self.hintSignal.emit(tr("Busy"), tr("Please wait, packing ..."))
+            return
         index = -1
         for i in range(len(self.fileSelectWidgets)):
             if len(self.fileSelectWidgets[i]) >= 8:
@@ -327,6 +330,9 @@ class MainWindow(QMainWindow):
         self.setWindowSize(self.width())
 
     def addAddFileWidget(self):
+        if self.packing:
+            self.hintSignal.emit(tr("Busy"), tr("Please wait, packing ..."))
+            return
         if len(self.fileSelectWidgets) == 2:
             removeButton0 = QPushButton()
             removeButton0.setProperty("class", "remove_file_selection")
@@ -448,6 +454,7 @@ class MainWindow(QMainWindow):
             self.fileSelectWidgets.append(["button", addoneWidget, addoneWidgetLayout, addFileButton, packFileButton])
             addFileButton.clicked.connect(self.addAddFileWidget)
             packFileButton.clicked.connect(self.packFile)
+            mergeFileButton.clicked.connect(self.mergeBin)
 
         self.fileSelectWidget_Path(index).setText(name)
 
@@ -571,6 +578,11 @@ class MainWindow(QMainWindow):
             self.packing = False
             return
         
+        if fileType=="kfpkg":
+            self.errorSignal.emit(tr("Error"), tr("Can not pack kfpkg"))
+            self.packing = False
+            return
+
         # select saving path
         if not os.path.exists(self.saveKfpkDir):
             self.saveKfpkDir = os.getcwd()
@@ -589,6 +601,7 @@ class MainWindow(QMainWindow):
         ok, msg = self.checkFilesAddrValid(fileType, files)
         if not ok:
             self.errorSignal.emit(tr("Error"), msg)
+            self.packing = False
             return
 
         # pack and save
@@ -617,7 +630,95 @@ class MainWindow(QMainWindow):
         self.hintSignal.emit(tr("Success"), tr("Save kfpkg success"))
         self.packing = False
 
+    def getBurnFilesInfoFromKfpkg(self, kfpkg):
+        pass
+
+    def mergeBin(self):
+        if self.packing:
+            self.hintSignal.emit(tr("Busy"), tr("Please wait, packing ..."))
+            return
+        self.packing = True
+        fileType, files = self.getBurnFilesInfo()
+        if fileType == "kfpkg":
+            files = self.getBurnFilesInfoFromKfpkg()
+            fileType = "bin"
+        if not fileType or not files:
+            self.errorSignal.emit(tr("Error"), tr("File path error"))
+            self.packing = False
+            return
+        
+
+        # select saving path
+        if not os.path.exists(self.saveKfpkDir):
+            self.saveKfpkDir = os.getcwd()
+        fileName_choose, filetype = QFileDialog.getSaveFileName(self,  
+                                    tr("Save File"),  
+                                    self.saveKfpkDir,
+                                    "Binary file (*.bin)")
+        if fileName_choose == "":
+            # self.errorSignal.emit(tr("Error"), tr("File path error"))
+            self.packing = False
+            return
+        if not fileName_choose.endswith(".bin"):
+            fileName_choose += ".bin"
+        self.saveKfpkDir = os.path.split(fileName_choose)[0]
+
+        ok, msg = self.checkFilesAddrValid(fileType, files)
+        if not ok:
+            self.errorSignal.emit(tr("Error"), msg)
+            self.packing = False
+            return
+
+        # pack and save
+        t = threading.Thread(target=self.mergeBinProccess, args=(files, fileName_choose,))
+        t.setDaemon(True)
+        t.start()
+    
+    def mergeBinProccess(self, files, fileSaveName):
+        self.updateProgressPrintSignal.emit(tr("Merging, please wait ..."))
+        files.sort(key=lambda file:file[1])
+        bin = b''
+        aesFlag = b'\x00'
+        startAddrLast = 0
+        fileSizeLast  = 0
+        if files[0][2]: # firmware
+            name = files[0][0]
+            size = os.path.getsize(name)
+            f = open(name, "rb")
+            firmware = f.read()
+            f.close()
+
+            bin += aesFlag                # add aes key flag
+            bin += struct.pack('I', size) # add firmware length
+            bin += firmware               # add firmware content
+            sha256Hash = hashlib.sha256(bin).digest()
+            bin += sha256Hash             # add parity
+
+            startAddrLast = 0
+            fileSizeLast = len(bin)
+            files.remove(files[0])
+
+        for file, addr, firmware in files:
+            print(file, addr, firmware)
+            fillLen = addr - (startAddrLast + fileSizeLast)
+            print(fillLen)
+            if fillLen > 0:               # fill 0xFF
+                fill = bytearray([0xFF for i in range(fillLen)])
+                bin += fill
+            with open(file, "rb") as f:   # add bin file content
+                bin += f.read()
+            startAddrLast = addr
+            fileSizeLast = os.path.getsize(file)
+        with open(fileSaveName, "wb") as f:
+            f.write(bin)
+        self.updateProgressPrintSignal.emit(tr("Save merged bin file success"))
+        self.hintSignal.emit(tr("Success"), tr("Save merged bin file success"))
+        self.packing = False
+
     def selectFile(self, pathobj):
+        if self.packing:
+            self.hintSignal.emit(tr("Busy"), tr("Please wait, packing ..."))
+            return
         index = -1
         for i in range(len(self.fileSelectWidgets)):
             if len(self.fileSelectWidgets[i]) >= 4:
@@ -822,6 +923,9 @@ class MainWindow(QMainWindow):
         self.updateProgressSignal.emit(fileTypeStr, current, total, speedStr)
 
     def download(self):
+        if self.packing:
+            self.hintSignal.emit(tr("Busy"), tr("Please wait, packing ..."))
+            return
         if self.burning:
             self.terminateBurn()
             return

@@ -102,6 +102,8 @@
     "File address error": "文件地址错误",
     "start from": "开始于",
     "but file": "但是文件",
-    "address range is": "地址范围为"
-
+    "address range is": "地址范围为",
+    "Can not pack kfpkg": "不能打包 kfpkg",
+    "Merging, please wait ...": "正在合并，请稍后 ...",
+    "Save merged bin file success": "保存合并的 .bin 文件成功"
 }
