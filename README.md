@@ -4,7 +4,7 @@ kflash_gui
 Cross platform GUI wrapper for [kflash.py](https://github.com/sipeed/kflash.py.git) (download(/burn) tool for k210)
 
 
-<img src="kflash_gui_data/assets/screenshot_1.2.1.png" width=500px/>
+![screenshot](kflash_gui_data/assets/screenshot_kflash_gui_v1.5.png)
 
 ## Features
 
