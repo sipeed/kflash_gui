@@ -163,6 +163,7 @@ class MainWindow(QMainWindow):
         self.boardCombobox.addItem(parameters.SipeedMaixduino)
         self.boardCombobox.addItem(parameters.SipeedMaixGo)
         self.boardCombobox.addItem(parameters.SipeedMaixGoD)
+        self.boardCombobox.addItem(parameters.M5StickV)
         self.boardCombobox.addItem(parameters.KendryteKd233)
         self.boardCombobox.addItem(parameters.kendryteTrainer)
         self.boardCombobox.addItem(parameters.Auto)
@@ -1042,6 +1043,8 @@ class MainWindow(QMainWindow):
             board = "kd233"
         elif boardText == parameters.kendryteTrainer:
             board = "trainer"
+        elif boardText == parameters.M5StickV:
+            board = "goE"
         elif boardText == parameters.Auto:
             board = None
 
