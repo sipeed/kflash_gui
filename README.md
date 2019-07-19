@@ -17,6 +17,10 @@ Cross platform GUI wrapper for [kflash.py](https://github.com/sipeed/kflash.py.g
 * Support Chinese and English Language 
 * Download(/burn) progress and speed display
 * Cancel download support
+* Support merge bins to one bin file
+* Support convert kfpkg to one bin file
+* Support enbale bin file or not
+* Auto identify firmware file
 
 
 ## Screenshots
@@ -36,7 +40,7 @@ Cross platform GUI wrapper for [kflash.py](https://github.com/sipeed/kflash.py.g
 
 * you can create your own shortcut by yourself； If `Linux`， edit the path in `kflash_gui.desktop`, then copy this file to `/usr/share/application` folder with administrator, and finally you can find `kflash_gui` app in the system menu
 
-* Select `bin` file or `kfpkg` file， set address to `0x0000` if file is firmware, and set `Prefix` checkbox to enable add parity prefix
+* Select `bin` file or `kfpkg` file， set address to `0x0000` if file is firmware
 * Select board
 * Select where firmware flash to, `Flash` or `SRAM`
 * Select serial port
@@ -85,6 +89,10 @@ Refer here: [blog.sipeed.com/p/390.html](http://blog.sipeed.com/p/390.html)
 * 界面支持中英文切换
 * 支持烧录进度显示和烧录速度显示
 * 支持取消下载进程
+* 支持合并多个 bin 文件为一个 bin 文件
+* 支持把 kfpkg 文件转换为一个 bin 文件
+* 支持使能 bin 文件
+* 自动识别文件是不是固件
 
 ## 使用方法
 
@@ -94,7 +102,7 @@ Refer here: [blog.sipeed.com/p/390.html](http://blog.sipeed.com/p/390.html)
 * 
 * 可以自行建快捷方式或者固定到开始页面或者固定要任务栏方便使用； 如果是 `Linux`， 可以修改 `kflash_gui.desktop` 里面的路径， 然后用管理员身份复制到`/usr/share/application` 目录， 然后就可以在系统菜单里面找到`kflash_gui`的图标了，点击即可打开
 
-* 选择 `bin` 文件或者 `kfpkg` 文件， 如果是`bin`文件需要指定地址，如果是固件需要指定`0x0000`地址并且选择`校验头`
+* 选择 `bin` 文件或者 `kfpkg` 文件， 如果是`bin`文件需要指定地址，如果是固件需要指定`0x0000`地址
 * 选择开发板
 * 选择烧录到开发板的哪个位置 `Flash`（速度慢但是重新上电还可运行） 或者 `SRAM`（`RAM`中运行，下载快断电丢失程序）
 * 选择串口
@@ -112,8 +120,6 @@ Refer here: [blog.sipeed.com/p/390.html](http://blog.sipeed.com/p/390.html)
 * 串口是否出了奇怪的问题，拔掉电脑连接到板子的线重新插一下试试
 
 ## 如何手动打包 `kfpkg`
-
-`bin` 文件只能下载到 `Flash` 地址 `0x000000`, 如果需要指定地址，比如下载模型文件，则需要创建 `kfpkg` 文件然后下载
 
 参考这里: [blog.sipeed.com/p/390.html](http://blog.sipeed.com/p/390.html)
 
