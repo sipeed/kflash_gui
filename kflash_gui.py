@@ -59,6 +59,7 @@ class MainWindow(QMainWindow):
         self.kflash = KFlash(print_callback=self.kflash_py_printCallback)
         self.saveKfpkDir = ""
         self.packing = False
+        self.zipTempFiles = []
 
     def setWindowSize(self, w=520, h=550):
         self.resize(w, h)
@@ -131,17 +132,23 @@ class MainWindow(QMainWindow):
         self.fileSelectLayout = QVBoxLayout()
         self.fileSelectGroupBox.setLayout(self.fileSelectLayout)
         oneFilePathWidget = QWidget()
+        mergeBinWidget = QWidget()
         oneFilePathWidgetLayout = QHBoxLayout()
+        mergeBinWidgetLayout = QHBoxLayout()
         oneFilePathWidget.setLayout(oneFilePathWidgetLayout)
+        mergeBinWidget.setLayout(mergeBinWidgetLayout)
         filePathWidget = QLineEdit()
         openFileButton = QPushButton(tr("OpenFile"))
+        mergeBinButton = QPushButton(tr("Merge to .bin"))
         oneFilePathWidgetLayout.addWidget(filePathWidget)
         oneFilePathWidgetLayout.addWidget(openFileButton)
         oneFilePathWidgetLayout.setStretch(0, 3)
         oneFilePathWidgetLayout.setStretch(1, 1)
+        mergeBinWidgetLayout.addWidget(mergeBinButton)
         self.fileSelectLayout.addWidget(oneFilePathWidget)
-        self.fileSelectWidgets = [["kfpkg", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, None, openFileButton]]
-                  # for "button": ["button", addoneWidget, addoneWidgetLayout, addFileButton, packFileButton]
+        self.fileSelectLayout.addWidget(mergeBinWidget)
+        self.fileSelectWidgets = [["kfpkg", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, None, openFileButton, mergeBinWidget, mergeBinButton]]
+                  # for "button": ["button", addoneWidget, addoneWidgetLayout, addFileButton, packFileButton, mergeBinButton]
                   # for "bin":    ["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox]
         # widgets board select
         boardSettingsGroupBox = QGroupBox(tr("BoardSettings"))
@@ -248,6 +255,7 @@ class MainWindow(QMainWindow):
         self.aboutButton.clicked.connect(self.showAbout)
         self.downloadButton.clicked.connect(self.download)
         self.fileSelectWidget_Button(0).clicked.connect(lambda:self.selectFile(self.fileSelectWidget_Path(0)))
+        self.fileSelectWidgets[0][7].clicked.connect(self.mergeBin)
 
         self.myObject=MyClass(self)
         slotLambda = lambda: self.indexChanged_lambda(self.myObject)
@@ -291,6 +299,12 @@ class MainWindow(QMainWindow):
         return self.fileSelectWidgets[index][6]
     
     def fileSelectWidget_Close(self, index):
+        return self.fileSelectWidgets[index][7]
+
+    def mergeBinWidget_Widget(self, index):
+        return self.fileSelectWidgets[index][6]
+
+    def mergeBinWidget_Button(self, index):
         return self.fileSelectWidgets[index][7]
 
     # @QtCore.pyqtSlot(str)
@@ -374,23 +388,31 @@ class MainWindow(QMainWindow):
                 if self.fileSelectWidget_Type(i)=="button":
                     self.fileSelectWidgets[i][3].clicked.disconnect()
                     self.fileSelectWidgets[i][4].clicked.disconnect()
+                    self.fileSelectWidgets[i][5].clicked.disconnect()
                 else:
                     self.fileSelectWidget_Button(i).clicked.disconnect()
                 # self.fileSelectLayout.removeWidget(self.fileSelectWidget_Widget(i))
                 self.fileSelectWidget_Widget(i).setParent(None)
             self.fileSelectWidgets.clear()
             oneFilePathWidget = QWidget()
+            mergeBinWidget = QWidget()
             oneFilePathWidgetLayout = QHBoxLayout()
+            mergeBinWidgetLayout = QHBoxLayout()
             oneFilePathWidget.setLayout(oneFilePathWidgetLayout)
+            mergeBinWidget.setLayout(mergeBinWidgetLayout)
             filePathWidget = QLineEdit()
             openFileButton = QPushButton(tr("OpenFile"))
+            mergeBinButton = QPushButton(tr("Merge to .bin"))
             oneFilePathWidgetLayout.addWidget(filePathWidget)
             oneFilePathWidgetLayout.addWidget(openFileButton)
             oneFilePathWidgetLayout.setStretch(0, 3)
             oneFilePathWidgetLayout.setStretch(1, 1)
+            mergeBinWidgetLayout.addWidget(mergeBinButton)
             self.fileSelectLayout.addWidget(oneFilePathWidget)
-            self.fileSelectWidgets.append(["kfpkg", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, None, openFileButton])
+            self.fileSelectLayout.addWidget(mergeBinWidget)
+            self.fileSelectWidgets.append(["kfpkg", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, None, openFileButton, mergeBinWidget, mergeBinButton])
             openFileButton.clicked.connect(lambda:self.selectFile(filePathWidget))
+            mergeBinButton.clicked.connect(self.mergeBin)
             filePathWidget.setText(name)
             # TODO: resize window
 
@@ -407,7 +429,9 @@ class MainWindow(QMainWindow):
     def fileSelectShowBin(self, index, name, addr=None, prefix=None, prefixAuto=False, closeButton=False ):
         if index==0 and self.fileSelectWidget_Type(0) == "kfpkg": #only one kgpkg before
             self.fileSelectWidget_Button(index).clicked.disconnect()
+            self.mergeBinWidget_Button(index).clicked.disconnect()
             # self.fileSelectLayout.removeWidget(self.fileSelectWidget_Widget(index))
+            self.mergeBinWidget_Widget(index).setParent(None)
             self.fileSelectWidget_Widget(index).setParent(None)
             self.fileSelectWidgets.clear()
             oneFilePathWidget = QWidget()
@@ -447,11 +471,12 @@ class MainWindow(QMainWindow):
             addFileButton = QPushButton(tr("Add File"))
             packFileButton = QPushButton(tr("Pack to kfpkg"))
             mergeFileButton = QPushButton(tr("Merge to .bin"))
+            mergeFileButton.setToolTip(tr("Merge hint"))
             addoneWidgetLayout.addWidget(addFileButton)
             addoneWidgetLayout.addWidget(packFileButton)
             addoneWidgetLayout.addWidget(mergeFileButton)
             self.fileSelectLayout.addWidget(addoneWidget)
-            self.fileSelectWidgets.append(["button", addoneWidget, addoneWidgetLayout, addFileButton, packFileButton])
+            self.fileSelectWidgets.append(["button", addoneWidget, addoneWidgetLayout, addFileButton, packFileButton, mergeFileButton])
             addFileButton.clicked.connect(self.addAddFileWidget)
             packFileButton.clicked.connect(self.packFile)
             mergeFileButton.clicked.connect(self.mergeBin)
@@ -631,7 +656,35 @@ class MainWindow(QMainWindow):
         self.packing = False
 
     def getBurnFilesInfoFromKfpkg(self, kfpkg):
-        pass
+        tempDir = tempfile.gettempdir()
+        listFileName = "flash-list.json"
+        try:
+            zip = zipfile.ZipFile(kfpkg, mode="r")
+            zip.extract(listFileName, tempDir)
+            with open(tempDir+"/"+listFileName) as f:
+                info = json.load(f)
+            filesInfo = {}
+            for fileInfo in info["files"]:
+                filesInfo[fileInfo["bin"]] = [fileInfo["address"], fileInfo["sha256Prefix"]]
+            print(filesInfo, zip.namelist())
+            binFiles = zip.namelist()
+            binFiles.remove(listFileName)
+            for file in binFiles:
+                zip.extract(file, tempDir)
+                self.zipTempFiles.append( (tempDir + "/" + file, filesInfo[file][0], filesInfo[file][1] ) )
+            zip.close()
+        except Exception as e:
+            return (None, str(e))
+        return (self.zipTempFiles,"")
+
+    def cleanKfpkgTempFiles(self):
+        tempDir = tempfile.gettempdir()
+        try:
+            for file in self.zipTempFiles:
+                os.remove(file[0])
+        except Exception:
+            pass
+        self.zipTempFiles = []
 
     def mergeBin(self):
         if self.packing:
@@ -640,10 +693,16 @@ class MainWindow(QMainWindow):
         self.packing = True
         fileType, files = self.getBurnFilesInfo()
         if fileType == "kfpkg":
-            files = self.getBurnFilesInfoFromKfpkg()
+            files, msg = self.getBurnFilesInfoFromKfpkg(files)
             fileType = "bin"
+            if not files:
+                self.errorSignal.emit(tr("Error"), msg)
+                self.cleanKfpkgTempFiles()
+                self.packing = False
+                return
         if not fileType or not files:
             self.errorSignal.emit(tr("Error"), tr("File path error"))
+            self.cleanKfpkgTempFiles()
             self.packing = False
             return
         
@@ -658,6 +717,7 @@ class MainWindow(QMainWindow):
         if fileName_choose == "":
             # self.errorSignal.emit(tr("Error"), tr("File path error"))
             self.packing = False
+            self.cleanKfpkgTempFiles()
             return
         if not fileName_choose.endswith(".bin"):
             fileName_choose += ".bin"
@@ -667,6 +727,7 @@ class MainWindow(QMainWindow):
         if not ok:
             self.errorSignal.emit(tr("Error"), msg)
             self.packing = False
+            self.cleanKfpkgTempFiles()
             return
 
         # pack and save
@@ -679,7 +740,7 @@ class MainWindow(QMainWindow):
         files.sort(key=lambda file:file[1])
         bin = b''
         aesFlag = b'\x00'
-        startAddrLast = 0
+        startAddrLast = files[0][1]
         fileSizeLast  = 0
         if files[0][2]: # firmware
             name = files[0][0]
@@ -714,6 +775,7 @@ class MainWindow(QMainWindow):
         self.updateProgressPrintSignal.emit(tr("Save merged bin file success"))
         self.hintSignal.emit(tr("Success"), tr("Save merged bin file success"))
         self.packing = False
+        self.cleanKfpkgTempFiles()
 
     def selectFile(self, pathobj):
         if self.packing:

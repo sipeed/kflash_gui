@@ -105,5 +105,6 @@
     "address range is": "地址范围为",
     "Can not pack kfpkg": "不能打包 kfpkg",
     "Merging, please wait ...": "正在合并，请稍后 ...",
-    "Save merged bin file success": "保存合并的 .bin 文件成功"
+    "Save merged bin file success": "保存合并的 .bin 文件成功",
+    "Merge hint": "合并多个 bin 文件到一个 bin 文件， 并以 0xFF 填充 bin 之间的空白位置"
 }
