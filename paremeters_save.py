@@ -13,7 +13,7 @@ class ParametersToSave:
 
     def __init__(self):
         self.files = []       # kfpkg: [file path]
-                        # bin files: [(path,addr,prefix), ...]
+                        # bin files: [(path,addr,prefix,enable), ...]
         self.board    = parameters.SipeedMaixBit
         self.burnPosition = tr_en("Flash")
         self.baudRate = 2
@@ -49,7 +49,7 @@ class ParametersToSave:
 
         try:
             with open(path, "w+") as f:
-                json.dump(data, f)
+                json.dump(data, f, indent=4)
         except:
             pass
     
