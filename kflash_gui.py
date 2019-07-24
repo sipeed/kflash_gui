@@ -60,9 +60,75 @@ class MainWindow(QMainWindow):
         self.saveKfpkDir = ""
         self.packing = False
         self.zipTempFiles = []
+        self.fileSelectWidgets = []
 
     def setWindowSize(self, w=520, h=550):
         self.resize(w, h)
+
+    def setFileSelectItemLayout(self, item, isKfpkg):
+        if isKfpkg:
+            item[4].hide()
+            item[2].setStretch(0, 1)
+            item[2].setStretch(1, 12)
+            item[2].setStretch(3, 4)
+            item[2].setStretch(4, 1)
+        else:
+            item[4].show()
+            item[2].setStretch(0, 1)
+            item[2].setStretch(1, 8)
+            item[2].setStretch(2, 4)
+            item[2].setStretch(3, 4)
+            item[2].setStretch(4, 1)
+
+    def addFileSelectionItem(self):
+        enableCheckbox = QCheckBox()
+        filePathWidget = QLineEdit()
+        fileBurnAddrWidget = QLineEdit("0x00000")
+        openFileButton = QPushButton(tr("OpenFile"))
+        removeButton = QPushButton()
+        removeButton.setProperty("class", "remove_file_selection")
+        oneFilePathWidget = QWidget()
+        oneFilePathWidgetLayout = QHBoxLayout()
+        oneFilePathWidget.setLayout(oneFilePathWidgetLayout)
+        oneFilePathWidgetLayout.addWidget(enableCheckbox)
+        oneFilePathWidgetLayout.addWidget(filePathWidget)
+        oneFilePathWidgetLayout.addWidget(fileBurnAddrWidget)
+        oneFilePathWidgetLayout.addWidget(openFileButton)
+        oneFilePathWidgetLayout.addWidget(removeButton)        
+
+        filesItemLen = len(self.fileSelectWidgets)
+        if filesItemLen != 0 and self.fileSelectWidgets[filesItemLen-1][4].isHidden():
+            fileBurnAddrWidget.hide()
+        else:
+            fileBurnAddrWidget.show()
+        if filesItemLen == 0:
+            removeButton.hide()
+        elif filesItemLen == 1:
+            self.fileSelectWidgets[0][7].show()
+        #                0        1                   2                       3               4                   5               6           7             8             
+        item =          ["kfpkg", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, False,      removeButton, enableCheckbox]
+        # for "bin":    ["bin", oneFilePathWidget,   oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, isFirmware, removeButton, enableCheckbox]
+        self.fileSelectWidgets.append(item)
+
+        self.setFileSelectItemLayout(item, True)
+
+        openFileButton.clicked.connect(lambda:self.selectFile(item))
+        removeButton.clicked.connect(lambda:self.removeFileSelectionItem(item))
+        self.fileSelectLayout.addWidget(oneFilePathWidget)
+        return item
+
+    def removeFileSelectionItem(self, item):
+        if self.packing:
+            self.hintSignal.emit(tr("Busy"), tr("Please wait, packing ..."))
+            return
+        if len(self.fileSelectWidgets) <= 1:
+            return
+        item[5].clicked.disconnect()
+        item[7].clicked.disconnect()
+        item[1].setParent(None)
+        self.fileSelectWidgets.remove(item)
+        self.downloadWidget.resize(self.downloadWidget.width(), 58)
+        self.setWindowSize(self.width())
 
     def initWindow(self):
         QToolTip.setFont(QFont('SansSerif', 10))
@@ -128,28 +194,31 @@ class MainWindow(QMainWindow):
         
         # widgets file select
         self.fileSelectGroupBox = QGroupBox(tr("SelectFile"))
+        # container
         settingLayout.addWidget(self.fileSelectGroupBox)
+        self.fileSelectContainerLayout = QVBoxLayout()
+        self.fileSelectGroupBox.setLayout(self.fileSelectContainerLayout)
+        # file selection
+        self.fileSelecWidget = QWidget()
         self.fileSelectLayout = QVBoxLayout()
-        self.fileSelectGroupBox.setLayout(self.fileSelectLayout)
-        oneFilePathWidget = QWidget()
+        self.fileSelecWidget.setLayout(self.fileSelectLayout)
+        self.fileSelectContainerLayout.addWidget(self.fileSelecWidget)
+        
+        # add file selection item
+        self.addFileSelectionItem()
+        
+        # add fileselection functions
         mergeBinWidget = QWidget()
-        oneFilePathWidgetLayout = QHBoxLayout()
         mergeBinWidgetLayout = QHBoxLayout()
-        oneFilePathWidget.setLayout(oneFilePathWidgetLayout)
         mergeBinWidget.setLayout(mergeBinWidgetLayout)
-        filePathWidget = QLineEdit()
-        openFileButton = QPushButton(tr("OpenFile"))
-        mergeBinButton = QPushButton(tr("Merge to .bin"))
-        oneFilePathWidgetLayout.addWidget(filePathWidget)
-        oneFilePathWidgetLayout.addWidget(openFileButton)
-        oneFilePathWidgetLayout.setStretch(0, 3)
-        oneFilePathWidgetLayout.setStretch(1, 1)
-        mergeBinWidgetLayout.addWidget(mergeBinButton)
-        self.fileSelectLayout.addWidget(oneFilePathWidget)
-        self.fileSelectLayout.addWidget(mergeBinWidget)
-        self.fileSelectWidgets = [["kfpkg", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, None, openFileButton, mergeBinWidget, mergeBinButton]]
-                  # for "button": ["button", addoneWidget, addoneWidgetLayout, addFileButton, packFileButton, mergeBinButton]
-                  # for "bin":    ["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox, removeButton, enabelCheckbox]
+        self.addFileButton = QPushButton(tr("Add File"))
+        self.packFilesButton = QPushButton(tr("Pack to kfpkg"))
+        self.mergeBinButton = QPushButton(tr("Merge to .bin"))
+        mergeBinWidgetLayout.addWidget(self.addFileButton)
+        mergeBinWidgetLayout.addWidget(self.packFilesButton)
+        mergeBinWidgetLayout.addWidget(self.mergeBinButton)
+        self.fileSelectContainerLayout.addWidget(mergeBinWidget)
+
         # widgets board select
         boardSettingsGroupBox = QGroupBox(tr("BoardSettings"))
         settingLayout.addWidget(boardSettingsGroupBox)
@@ -255,8 +324,10 @@ class MainWindow(QMainWindow):
         self.skinButton.clicked.connect(self.skinChange)
         self.aboutButton.clicked.connect(self.showAbout)
         self.downloadButton.clicked.connect(self.download)
-        self.fileSelectWidget_Button(0).clicked.connect(lambda:self.selectFile(self.fileSelectWidget_Path(0)))
-        self.fileSelectWidgets[0][7].clicked.connect(self.mergeBin)
+
+        self.addFileButton.clicked.connect(lambda: self.fileSelectLayout.addWidget(self.addFileSelectionItem()[1]))
+        self.packFilesButton.clicked.connect(self.packFiles)
+        self.mergeBinButton.clicked.connect(self.mergeBin)
 
         self.myObject=MyClass(self)
         slotLambda = lambda: self.indexChanged_lambda(self.myObject)
@@ -278,39 +349,6 @@ class MainWindow(QMainWindow):
             self.frameLayout.setStretch(4,1)
             self.frameLayout.setStretch(5,1)
     
-    def fileSelectWidget_Type(self, index):
-        return self.fileSelectWidgets[index][0]
-
-    def fileSelectWidget_Widget(self, index):
-        return self.fileSelectWidgets[index][1]
-    
-    def fileSelectWidget_Layout(self, index):
-        return self.fileSelectWidgets[index][2]
-
-    def fileSelectWidget_Path(self, index):
-        return self.fileSelectWidgets[index][3]
-
-    def fileSelectWidget_Addr(self, index):
-        return self.fileSelectWidgets[index][4]
-    
-    def fileSelectWidget_Button(self, index):
-        return self.fileSelectWidgets[index][5]
-    
-    def fileSelectWidget_Prefix(self, index):
-        return self.fileSelectWidgets[index][6]
-    
-    def fileSelectWidget_Close(self, index):
-        return self.fileSelectWidgets[index][7]
-    
-    def fileSelectWidget_Enable(self, index):
-        return self.fileSelectWidgets[index][8]
-
-    def mergeBinWidget_Widget(self, index):
-        return self.fileSelectWidgets[index][6]
-
-    def mergeBinWidget_Button(self, index):
-        return self.fileSelectWidgets[index][7]
-
     # @QtCore.pyqtSlot(str)
     def indexChanged_lambda(self, obj):
         mainObj = obj.arg
@@ -324,224 +362,96 @@ class MainWindow(QMainWindow):
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
-    def removeFileSelection(self, button):
-        if self.packing:
-            self.hintSignal.emit(tr("Busy"), tr("Please wait, packing ..."))
-            return
-        index = -1
-        for i in range(len(self.fileSelectWidgets)):
-            if len(self.fileSelectWidgets[i]) >= 8:
-                if self.fileSelectWidget_Close(i) == button:
-                    index = i
-        if index == -1:
-            return
-        if len(self.fileSelectWidgets) > 2:
-            self.fileSelectWidget_Button(index).clicked.disconnect()
-            self.fileSelectWidget_Close(index).clicked.disconnect()
-            self.fileSelectWidget_Widget(index).setParent(None)
-            self.fileSelectWidgets.remove(self.fileSelectWidgets[index])
-        if len(self.fileSelectWidgets) == 2:
-            self.fileSelectWidget_Close(0).clicked.disconnect()
-            self.fileSelectWidget_Close(0).setParent(None)
-            self.fileSelectWidgets[0].remove(self.fileSelectWidget_Close(0))
-        self.downloadWidget.resize(self.downloadWidget.width(), 58)
-        self.setWindowSize(self.width())
 
-    def addAddFileWidget(self, enable=True):
-        if self.packing:
-            self.hintSignal.emit(tr("Busy"), tr("Please wait, packing ..."))
-            return
-        if len(self.fileSelectWidgets) == 2:
-            removeButton0 = QPushButton()
-            removeButton0.setProperty("class", "remove_file_selection")
-            self.fileSelectWidgets[0][2].addWidget(removeButton0)
-            self.fileSelectWidgets[0].append(removeButton0)
-            removeButton0.clicked.connect(lambda:self.removeFileSelection(removeButton0))
-        oneFilePathWidget = QWidget()
-        oneFilePathWidgetLayout = QHBoxLayout()
-        oneFilePathWidget.setLayout(oneFilePathWidgetLayout)
-        filePathWidget = QLineEdit()
-        fileBurnAddrWidget = QLineEdit("0x00000")
-        fileBurnEncCheckbox = QCheckBox(tr("Firmware"))
-        fileBurnEncCheckbox.setToolTip(tr("bin prefix tips"))
-        fileBurnEncCheckbox.hide()
-        openFileButton = QPushButton(tr("OpenFile"))
-        removeButton = QPushButton()
-        removeButton.setProperty("class", "remove_file_selection")
-        enableCheckbox = QCheckBox()
-        oneFilePathWidgetLayout.addWidget(enableCheckbox)
-        oneFilePathWidgetLayout.addWidget(filePathWidget)
-        oneFilePathWidgetLayout.addWidget(fileBurnAddrWidget)
-        oneFilePathWidgetLayout.addWidget(fileBurnEncCheckbox)
-        oneFilePathWidgetLayout.addWidget(openFileButton)
-        oneFilePathWidgetLayout.addWidget(removeButton)
-        oneFilePathWidgetLayout.setStretch(0, 1)
-        oneFilePathWidgetLayout.setStretch(1, 8)
-        oneFilePathWidgetLayout.setStretch(2, 4)
-        oneFilePathWidgetLayout.setStretch(3, 1)
-        oneFilePathWidgetLayout.setStretch(4, 4)
-        # oneFilePathWidgetLayout.setStretch(4, 1)
-        index = len(self.fileSelectWidgets)-1
-        self.fileSelectWidgets.insert(index, ["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox, removeButton, enableCheckbox])
-        self.fileSelectLayout.insertWidget(index, oneFilePathWidget)
-        openFileButton.clicked.connect(lambda:self.selectFile(filePathWidget))
-        removeButton.clicked.connect(lambda:self.removeFileSelection(removeButton))
-        if enable:
-            enableCheckbox.setChecked(True)
-        else:
-            enableCheckbox.setChecked(False)
 
-    def fileSelectShowKfpkg(self, index, name):
-        if index==0 and self.fileSelectWidget_Type(0) == "kfpkg": #only one kgpkg before
-            self.fileSelectWidget_Path(index).setText(name)
-        else:# have bin file before, remove all and add one for kfpkg
-            for i in range(len(self.fileSelectWidgets)):
-                if self.fileSelectWidget_Type(i)=="button":
-                    self.fileSelectWidgets[i][3].clicked.disconnect()
-                    self.fileSelectWidgets[i][4].clicked.disconnect()
-                    self.fileSelectWidgets[i][5].clicked.disconnect()
-                else:
-                    self.fileSelectWidget_Button(i).clicked.disconnect()
-                # self.fileSelectLayout.removeWidget(self.fileSelectWidget_Widget(i))
-                self.fileSelectWidget_Widget(i).setParent(None)
-            self.fileSelectWidgets.clear()
-            oneFilePathWidget = QWidget()
-            mergeBinWidget = QWidget()
-            oneFilePathWidgetLayout = QHBoxLayout()
-            mergeBinWidgetLayout = QHBoxLayout()
-            oneFilePathWidget.setLayout(oneFilePathWidgetLayout)
-            mergeBinWidget.setLayout(mergeBinWidgetLayout)
-            filePathWidget = QLineEdit()
-            openFileButton = QPushButton(tr("OpenFile"))
-            mergeBinButton = QPushButton(tr("Merge to .bin"))
-            oneFilePathWidgetLayout.addWidget(filePathWidget)
-            oneFilePathWidgetLayout.addWidget(openFileButton)
-            oneFilePathWidgetLayout.setStretch(0, 3)
-            oneFilePathWidgetLayout.setStretch(1, 1)
-            mergeBinWidgetLayout.addWidget(mergeBinButton)
-            self.fileSelectLayout.addWidget(oneFilePathWidget)
-            self.fileSelectLayout.addWidget(mergeBinWidget)
-            self.fileSelectWidgets.append(["kfpkg", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, None, openFileButton, mergeBinWidget, mergeBinButton])
-            openFileButton.clicked.connect(lambda:self.selectFile(filePathWidget))
-            mergeBinButton.clicked.connect(self.mergeBin)
-            filePathWidget.setText(name)
-            # TODO: resize window
-
-    def highlightFirmwarePath(self, firmware, index):
+    def highlightFirmwarePath(self, item, firmware):
         if firmware:
-            self.fileSelectWidget_Path(index).setProperty("class", "qLineEditHighlight")
-            self.fileSelectWidget_Addr(index).setText("0x00000")
+            item[3].setProperty("class", "qLineEditHighlight")
+            item[4].setText("0x00000")
         else:
-            self.fileSelectWidget_Path(index).setProperty("class", "qLineEditNormal")
-        self.frameWidget.style().unpolish(self.fileSelectWidget_Path(index))
-        self.frameWidget.style().polish(self.fileSelectWidget_Path(index))
+            item[3].setProperty("class", "qLineEditNormal")
+        self.frameWidget.style().unpolish(item[3])
+        self.frameWidget.style().polish(item[3])
         self.frameWidget.update()
 
-    def fileSelectShowBin(self, index, name, addr=None, prefix=None, prefixAuto=False, closeButton=False, enable=True ):
-        if index==0 and self.fileSelectWidget_Type(0) == "kfpkg": #only one kgpkg before
-            self.fileSelectWidget_Button(index).clicked.disconnect()
-            self.mergeBinWidget_Button(index).clicked.disconnect()
-            # self.fileSelectLayout.removeWidget(self.fileSelectWidget_Widget(index))
-            self.mergeBinWidget_Widget(index).setParent(None)
-            self.fileSelectWidget_Widget(index).setParent(None)
-            self.fileSelectWidgets.clear()
-            oneFilePathWidget = QWidget()
-            oneFilePathWidgetLayout = QHBoxLayout()
-            oneFilePathWidget.setLayout(oneFilePathWidgetLayout)
-            enableCheckbox = QCheckBox()
-            filePathWidget = QLineEdit()
-            fileBurnAddrWidget = QLineEdit("0x00000")
-            fileBurnEncCheckbox = QCheckBox(tr("Firmware"))
-            fileBurnEncCheckbox.setToolTip(tr("bin prefix tips"))
-            fileBurnEncCheckbox.hide()
-            openFileButton = QPushButton(tr("OpenFile"))
-            if closeButton:
-                removeButton = QPushButton()
-                removeButton.setProperty("class", "remove_file_selection")
-            oneFilePathWidgetLayout.addWidget(enableCheckbox)
-            oneFilePathWidgetLayout.addWidget(filePathWidget)
-            oneFilePathWidgetLayout.addWidget(fileBurnAddrWidget)
-            oneFilePathWidgetLayout.addWidget(fileBurnEncCheckbox)
-            oneFilePathWidgetLayout.addWidget(openFileButton)
-            if closeButton:
-                oneFilePathWidgetLayout.addWidget(removeButton)
-            oneFilePathWidgetLayout.setStretch(0, 1)
-            oneFilePathWidgetLayout.setStretch(1, 8)
-            oneFilePathWidgetLayout.setStretch(2, 4)
-            oneFilePathWidgetLayout.setStretch(3, 1)
-            oneFilePathWidgetLayout.setStretch(4, 4)
-            # oneFilePathWidgetLayout.setStretch(4, 1)
-            self.fileSelectLayout.addWidget(oneFilePathWidget)
-            openFileButton.clicked.connect(lambda:self.selectFile(filePathWidget))
-            if closeButton:
-                self.fileSelectWidgets.append(["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox, removeButton, enableCheckbox])
-                removeButton.clicked.connect(lambda:self.removeFileSelection(removeButton))
+    def fileSelectShow(self, item, name, addr=None, firmware=None, enable=True, loadFirst = False):
+        isKfpkg = False
+        if self.isKfpkg(name):
+            isKfpkg = True 
+        if not item: # add item from param
+            if loadFirst:
+                item = self.fileSelectWidgets[0]
             else:
-                self.fileSelectWidgets.append(["bin", oneFilePathWidget, oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, fileBurnEncCheckbox, None, enableCheckbox])
-            # add ADD button
-            addoneWidget = QWidget()
-            addoneWidgetLayout = QHBoxLayout()
-            addoneWidget.setLayout(addoneWidgetLayout)
-            addFileButton = QPushButton(tr("Add File"))
-            packFileButton = QPushButton(tr("Pack to kfpkg"))
-            mergeFileButton = QPushButton(tr("Merge to .bin"))
-            mergeFileButton.setToolTip(tr("Merge hint"))
-            addoneWidgetLayout.addWidget(addFileButton)
-            addoneWidgetLayout.addWidget(packFileButton)
-            addoneWidgetLayout.addWidget(mergeFileButton)
-            self.fileSelectLayout.addWidget(addoneWidget)
-            self.fileSelectWidgets.append(["button", addoneWidget, addoneWidgetLayout, addFileButton, packFileButton, mergeFileButton])
-            addFileButton.clicked.connect(self.addAddFileWidget)
-            packFileButton.clicked.connect(self.packFile)
-            mergeFileButton.clicked.connect(self.mergeBin)
-            print("---",enable)
-            enableCheckbox.setChecked(enable)
+                item = self.addFileSelectionItem()
+            if isKfpkg:
+                self.highlightFirmwarePath(item, False)
+                self.setFileSelectItemLayout(item, True)
+            else:
+                item[4].setText("0x%06x" %(addr))
+                self.setFileSelectItemLayout(item, False)
+                if self.isFileFirmware(name):
+                    self.highlightFirmwarePath(item, True)
+                    item[6] = True
+                else:
+                    self.highlightFirmwarePath(item, False)
+                    item[6] = False
+            item[3].setText(name)
+            item[8].setChecked(enable)
+            return
 
-        self.fileSelectWidget_Path(index).setText(name)
+        if isKfpkg:
+            self.setFileSelectItemLayout(item, True)
+            self.highlightFirmwarePath(item, False)
+            # disable other items
+            for i in self.fileSelectWidgets:
+                i[8].setChecked(False)
+            # only enable this kfpkg
+            item[8].setChecked(True)
+        else:
+            self.setFileSelectItemLayout(item, False)
+            if self.isFileFirmware(name):
+                self.highlightFirmwarePath(item, True)
+                item[4].setText("0x00000")
+            else:
+                self.highlightFirmwarePath(item, False)
+            # disable kfpkg file
+            for i in self.fileSelectWidgets:
+                if self.isKfpkg(i[3].text()):
+                    i[8].setChecked(False)
+            # enable this bin file
+            item[8].setChecked(True)
+        item[3].setText(name)
 
-        if prefixAuto:
-            prefixCheck = False
-            if name.endswith(".bin"):
-                f = open(name, "rb")
-                start_bytes = f.read(6)
-                f.close()                
-                for flags in self.firmware_start_bytes:
-                    if flags in start_bytes:
-                        prefixCheck = True
-            self.fileSelectWidget_Prefix(index).setChecked(prefixCheck)                
-            self.highlightFirmwarePath(prefixCheck, index)
-        elif prefix:
-            self.fileSelectWidget_Prefix(index).setChecked(True)
-            self.highlightFirmwarePath(True, index)
-        if addr:
-                self.fileSelectWidget_Addr(index).setText("0x%06x" %(addr))
-
-    # return: ("kfpkg", [(file path, burn addr, add prefix),...])
-    #      or ("bin", file path)
-    #      or (None, None)
+    # return: ("bin", [(file path, burn addr, add prefix, enable),...])
+    #      or ("kfpkg", file path)
+    #      or (None, msg)
     def getBurnFilesInfo(self):
         files = []
-        if self.fileSelectWidgets[0][0] == "kfpkg":
-            path = self.fileSelectWidget_Path(0).text().strip()
+        fileType = ""
+        for item in self.fileSelectWidgets:
+            path = item[3].text().strip()
+            enable = item[8].isChecked()
+            try:
+                addr = int(item[4].text(),16)
+            except Exception:
+                addr = 0
+            if not enable:
+                continue
             if path=="" or not os.path.exists(path):
-                self.errorSignal.emit(tr("Error"), tr("Line {}: ").format(i+1)+tr("File path error")+":"+path)
-                return (None, None)
-            return ("kfpkg", path)
-        for i in range(len(self.fileSelectWidgets)):
-            if self.fileSelectWidgets[i][0] == "bin":
-                path = self.fileSelectWidget_Path(i).text().strip()
-                if path=="":
-                    continue
-                if not os.path.exists(path):
-                    self.errorSignal.emit(tr("Error"), tr("Line {}: ").format(i+1)+tr("File path error")+":"+path)
-                    return (None, None)
-                try:
-                    addr = int(self.fileSelectWidgets[i][4].text(), 16)
-                except Exception:
-                    self.errorSignal.emit(tr("Error"), tr("Line {}: ").format(i+1)+tr("Address error")+self.fileSelectWidgets[i][4].text())
-                    return (None, None)
-                files.append( (path, addr, self.fileSelectWidget_Prefix(i).isChecked() , self.fileSelectWidget_Enable(i).isChecked()) )
-        return ("bin", files)
+                    return (None, tr("Line {}: ").format(self.fileSelectWidgets.index(item)+1)+tr("File path error")+":"+path)
+            if self.isKfpkg(path):
+                if fileType == "bin":
+                    return (None, tr("Can not select kfpkg and bin files at the time"))
+                fileType = "kfpkg"
+                if len(files) != 0:
+                    return (None, tr("Only support one kfpkg file"))
+                files = path
+            else:
+                if fileType == "kfpkg":
+                    return (None, tr("Can not select kfpkg and bin files at the time"))
+                fileType = "bin"
+                files.append( (path, addr, item[6] , enable) )
+        return (fileType, files)
 
     class KFPKG():
         def __init__(self):
@@ -613,15 +523,15 @@ class MainWindow(QMainWindow):
                 return (False, tr("No file selected"))
         return (True, "")
 
-    def packFile(self):
+    def packFiles(self):
         if self.packing:
             self.hintSignal.emit(tr("Busy"), tr("Please wait, packing ..."))
             return
         self.packing = True
 
         fileType, files = self.getBurnFilesInfo()
-        if not fileType or not files or fileType=="kfpkg":
-            self.errorSignal.emit(tr("Error"), tr("File path error"))
+        if not fileType:
+            self.errorSignal.emit(tr("Error"), files)
             self.packing = False
             return
         
@@ -629,7 +539,7 @@ class MainWindow(QMainWindow):
             self.errorSignal.emit(tr("Error"), tr("Can not pack kfpkg"))
             self.packing = False
             return
-        
+
         ok, msg = self.checkFilesAddrValid(fileType, files)
         if not ok:
             self.errorSignal.emit(tr("Error"), msg)
@@ -647,7 +557,7 @@ class MainWindow(QMainWindow):
             # self.errorSignal.emit(tr("Error"), tr("File path error"))
             self.packing = False
             return
-        if not fileName_choose.endswith(".kfpkg"):
+        if not self.isKfpkg(fileName_choose):
             fileName_choose += ".kfpkg"
         self.saveKfpkDir = os.path.split(fileName_choose)[0]
 
@@ -715,6 +625,11 @@ class MainWindow(QMainWindow):
             return
         self.packing = True
         fileType, files = self.getBurnFilesInfo()
+        if not fileType:
+            self.errorSignal.emit(tr("Error"), files)
+            self.cleanKfpkgTempFiles()
+            self.packing = False
+            return
         if fileType == "kfpkg":
             files, msg = self.getBurnFilesInfoFromKfpkg(files)
             fileType = "bin"
@@ -723,11 +638,6 @@ class MainWindow(QMainWindow):
                 self.cleanKfpkgTempFiles()
                 self.packing = False
                 return
-        if not fileType or not files:
-            self.errorSignal.emit(tr("Error"), tr("File path error"))
-            self.cleanKfpkgTempFiles()
-            self.packing = False
-            return
         
         ok, msg = self.checkFilesAddrValid(fileType, files)
         if not ok:
@@ -799,23 +709,14 @@ class MainWindow(QMainWindow):
         self.packing = False
         self.cleanKfpkgTempFiles()
 
-    def selectFile(self, pathobj):
+    def selectFile(self, item):
         if self.packing:
             self.hintSignal.emit(tr("Busy"), tr("Please wait, packing ..."))
             return
-        index = -1
-        for i in range(len(self.fileSelectWidgets)):
-            if len(self.fileSelectWidgets[i]) >= 4:
-                if pathobj == self.fileSelectWidget_Path(i):
-                    index = i
-        if index == -1:
-            return
-        tmp = index
-        while tmp>=0:
-            oldPath = self.fileSelectWidget_Path(tmp).text()
-            if oldPath != "":
-                break
-            tmp -= 1
+        index = self.fileSelectWidgets.index(item)
+        oldPath = item[3].text()
+        if oldPath=="" and index > 0:
+            oldPath = self.fileSelectWidgets[index - 1][3].text()
         if oldPath=="":
             oldPath = os.getcwd()
         fileName_choose, filetype = QFileDialog.getOpenFileName(self,  
@@ -828,10 +729,7 @@ class MainWindow(QMainWindow):
         if not self.isFileValid(fileName_choose):
             self.errorSignal.emit(tr("Error"), tr("File path error"))
             return
-        if self.isKfpkg(fileName_choose):
-            self.fileSelectShowKfpkg(index, fileName_choose)
-        else:
-            self.fileSelectShowBin(index, fileName_choose, prefixAuto=True, closeButton=False, enable=True)
+        self.fileSelectShow(item, fileName_choose)
 
     def errorHint(self, title, str):
         QMessageBox.critical(self, title, str)
@@ -861,6 +759,18 @@ class MainWindow(QMainWindow):
         if name.endswith(".kfpkg"):
             return True
         return False
+    
+    def isFileFirmware(self, name):
+        isFirmware = False
+        if name.endswith(".bin"):
+            f = open(name, "rb")
+            start_bytes = f.read(6)
+            f.close()                
+            for flags in self.firmware_start_bytes:
+                if flags in start_bytes:
+                    isFirmware = True
+                    break
+        return isFirmware     
 
     def isFileValid(self, name):
         if not os.path.exists(name):
@@ -893,17 +803,14 @@ class MainWindow(QMainWindow):
         paramObj.baudRate = self.serailBaudrateCombobox.currentIndex()
         paramObj.skin = self.param.skin
         paramObj.language = translation.current_lang
-        path = self.fileSelectWidget_Path(0).text()
-        if path.endswith(".kfpkg"):
-            paramObj.files.append(path)
-        else:
-            for i in range(len(self.fileSelectWidgets)):
-                try:
-                    addr = int(self.fileSelectWidget_Addr(i).text(),16)
-                except Exception:
-                    continue
-                fileInfo = (self.fileSelectWidget_Path(i).text(), addr, self.fileSelectWidget_Prefix(i).isChecked(), self.fileSelectWidget_Enable(i).isChecked())
-                paramObj.files.append(fileInfo)
+        for item in self.fileSelectWidgets:
+            path = item[3].text()
+            try:
+                addr = int(item[4].text(),16)
+            except Exception:
+                addr = 0
+            fileInfo = (path, addr, item[6], item[8].isChecked())
+            paramObj.files.append(fileInfo)
         if self.slowModeCombobox.currentIndex()==0:
             paramObj.slowMode = True
         else:
@@ -918,22 +825,17 @@ class MainWindow(QMainWindow):
 
     def updateFrameParams(self):
         pathLen = len(self.param.files)
-        if pathLen == 1 and type(self.param.files[0])==str and self.param.files[0].endswith(".kfpkg"):
-            self.fileSelectWidget_Path(0).setText(self.param.files[0])
-        elif pathLen != 0:
-            index = 0
-            if len(self.param.files[0]) != 4:
+        if pathLen != 0:
+            if len(self.param.files[0]) != 4: # [ (path, addr, prefix, enable), ...]
                 return
-            for path, addr, prefix, enable  in self.param.files:
-                prefix = None if (not prefix) else True
-                if index!=0:
-                    self.addAddFileWidget(enable = enable)
-                if pathLen > 1 and index != 0:
-                    closeButton = True
+            count = 0
+            for path, addr, firmware, enable  in self.param.files:
+                firmware = None if (not firmware) else True
+                if count == 0:
+                    self.fileSelectShow(None, path, addr, firmware, enable=enable, loadFirst = True)
                 else:
-                    closeButton = False
-                self.fileSelectShowBin(index, path, addr, prefix, closeButton=closeButton, enable=enable)
-                index += 1
+                    self.fileSelectShow(None, path, addr, firmware, enable=enable, loadFirst = False)
+                count += 1
         self.boardCombobox.setCurrentText(self.param.board)
         self.burnPositionCombobox.setCurrentText(self.param.burnPosition)
         self.serailBaudrateCombobox.setCurrentIndex(self.param.baudRate)

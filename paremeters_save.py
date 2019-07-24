@@ -12,8 +12,7 @@ else:
 class ParametersToSave:
 
     def __init__(self):
-        self.files = []       # kfpkg: [file path]
-                        # bin files: [(path,addr,prefix,enable), ...]
+        self.files = []       # [ (path, addr, firmware, enable), ...]
         self.board    = parameters.SipeedMaixBit
         self.burnPosition = tr_en("Flash")
         self.baudRate = 2
