@@ -97,10 +97,9 @@ class MainWindow(QMainWindow):
         oneFilePathWidgetLayout.addWidget(removeButton)        
 
         filesItemLen = len(self.fileSelectWidgets)
-        if filesItemLen != 0 and self.fileSelectWidgets[filesItemLen-1][4].isHidden():
-            fileBurnAddrWidget.hide()
-        else:
-            fileBurnAddrWidget.show()
+        hideAddrWidget = True
+        if filesItemLen != 0 and not self.fileSelectWidgets[filesItemLen-1][4].isHidden():
+            hideAddrWidget = False
         if filesItemLen == 0:
             removeButton.hide()
         elif filesItemLen == 1:
@@ -110,7 +109,7 @@ class MainWindow(QMainWindow):
         # for "bin":    ["bin", oneFilePathWidget,   oneFilePathWidgetLayout, filePathWidget, fileBurnAddrWidget, openFileButton, isFirmware, removeButton, enableCheckbox]
         self.fileSelectWidgets.append(item)
 
-        self.setFileSelectItemLayout(item, True)
+        self.setFileSelectItemLayout(item, hideAddrWidget)
 
         openFileButton.clicked.connect(lambda:self.selectFile(item))
         removeButton.clicked.connect(lambda:self.removeFileSelectionItem(item))
@@ -422,6 +421,8 @@ class MainWindow(QMainWindow):
                     i[8].setChecked(False)
             # enable this bin file
             item[8].setChecked(True)
+            if self.isFileFirmware(name):
+                item[6] = True
         item[3].setText(name)
 
     # return: ("bin", [(file path, burn addr, add prefix, enable),...])
@@ -433,6 +434,12 @@ class MainWindow(QMainWindow):
         for item in self.fileSelectWidgets:
             path = item[3].text().strip()
             enable = item[8].isChecked()
+            if self.isFileFirmware(path):
+                item[6] = True
+                self.highlightFirmwarePath(item, True)
+            else:
+                item[6] = False
+                self.highlightFirmwarePath(item, False)
             try:
                 addr = int(item[4].text(),16)
             except Exception:
