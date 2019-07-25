@@ -127,6 +127,8 @@ class MainWindow(QMainWindow):
         item[7].clicked.disconnect()
         item[1].setParent(None)
         self.fileSelectWidgets.remove(item)
+        if len(self.fileSelectWidgets) == 1:
+            self.fileSelectWidgets[0][7].hide()
         self.downloadWidget.resize(self.downloadWidget.width(), 58)
         self.setWindowSize(self.width())
 
