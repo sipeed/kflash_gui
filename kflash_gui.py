@@ -771,6 +771,8 @@ class MainWindow(QMainWindow):
     
     def isFileFirmware(self, name):
         isFirmware = False
+        if not os.path.exists(name):
+            return False
         if name.endswith(".bin"):
             f = open(name, "rb")
             start_bytes = f.read(6)
