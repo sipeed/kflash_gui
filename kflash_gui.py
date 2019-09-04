@@ -442,6 +442,9 @@ class MainWindow(QMainWindow):
                 self.highlightFirmwarePath(item, False)
             try:
                 addr = int(item[4].text(),16)
+                if enable:
+                    if addr%(0x10000) != 0: # 64KiB align
+                        return (None, tr("Adress must align with 64KiB(0x10000)"))
             except Exception:
                 addr = 0
             if not enable:
@@ -931,7 +934,7 @@ class MainWindow(QMainWindow):
             return
         fileType, filesInfo = self.getBurnFilesInfo()
         if not fileType or not filesInfo:
-            self.errorSignal.emit(tr("Error"), tr("File path error"))
+            self.errorSignal.emit(tr("Error"), filesInfo)
             return
 
         self.burning = True

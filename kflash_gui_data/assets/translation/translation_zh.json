@@ -109,5 +109,6 @@
     "Merge hint": "合并多个 bin 文件到一个 bin 文件， 并以 0xFF 填充 bin 之间的空白位置",
     "No file selected": "没有文件被选中",
     "Can not select kfpkg and bin files at the time": "不能同时选择 kfpkg 和 bin 文件",
-    "Only support one kfpkg file": "只支持一个 kfpkg 文件"
+    "Only support one kfpkg file": "只支持一个 kfpkg 文件",
+    "Adress must align with 64KiB(0x10000)": "地址必须 64KiB(0x10000) 对齐"
 }
