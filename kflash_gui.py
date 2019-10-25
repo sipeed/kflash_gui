@@ -936,6 +936,10 @@ class MainWindow(QMainWindow):
         if not fileType or not filesInfo:
             self.errorSignal.emit(tr("Error"), filesInfo)
             return
+        ok, msg = self.checkFilesAddrValid(fileType, filesInfo)
+        if not ok:
+            self.errorSignal.emit(tr("Error"), msg)
+            return
 
         self.burning = True
         # if not self.checkFileName(filename):
@@ -1044,11 +1048,11 @@ class MainWindow(QMainWindow):
                 errMsg = tr2(str(e))
                 if str(e) != "Burn SRAM OK":
                     success = False
-        if tmpFile != "":
-            try:
-                os.remove(filename)
-            except Exception:
-                print("Can not delete tmp file:", filename)
+            if tmpFile != "" and filename:
+                try:
+                    os.remove(filename)
+                except Exception:
+                    print("Can not delete tmp file:", filename)
         if success:
             self.downloadResultSignal.emit(True, errMsg)
         else:
