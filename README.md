@@ -47,15 +47,29 @@ Cross platform GUI wrapper for [kflash.py](https://github.com/sipeed/kflash.py.g
 * Select baudrate, `1.5M` recommend
 * Click Download to burn firmware or model to board
 
-or you can run source code by command:
+## Running from source
 
-```shell
+This repository uses submodules. The ``--recursive`` should be used so the required submodule(s) are downloaded.
+
+```
+git clone  --recursive https://github.com/sipeed/kflash_gui.git
+cd kflash_gui
+```
+
+Assuming a Debian based distro is being used, dependencies can be installed with the following commands.
+
+```
 sudo apt install python3 python3-pip
 sudo pip3 install -r requirements.txt
+```
+
+kflash_gui can be run from the source file as follows:
+
+```
 python3 kflash_gui.py
 ```
 
-and pack execution package by command:
+An execution package can be made with these commands:
 
 ```shell
 sudo pip3 install pyinstaller
@@ -63,7 +77,7 @@ python3 pack.py
 ```
 
 
-## If download fail
+## If downloading fails
 
 * Check hardware connection
 * Check board selection
