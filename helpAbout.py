@@ -6,10 +6,9 @@ import time
 
 versionMajor = 1
 versionMinor = 5
-versionDev   = 4
+versionDev   = 5
 
-time_now = time.localtime(time.time())
-date = str(time_now.tm_year)+"."+str(time_now.tm_mon)+"."+str(time_now.tm_mday)
+date = "2020.02.17"
 
 def strAbout():
     pathDirList = sys.argv[0].replace("\\", "/").split("/")
