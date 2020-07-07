@@ -463,8 +463,6 @@ class MainWindow(QMainWindow):
                     return (None, tr("Can not select kfpkg and bin files at the time"))
                 fileType = "bin"
                 prefix = item[6]
-                if addr == 0x00:
-                    prefix = True
                 files.append( (path, addr, prefix, enable) )
         return (fileType, files)
 
