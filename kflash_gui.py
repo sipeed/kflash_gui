@@ -79,6 +79,17 @@ class MainWindow(QMainWindow):
         for key in self.eraseTemplateConfigs:
             config[self.eraseTemplateConfigs[key]["lang"][current_lang]] = self.eraseTemplateConfigs[key]["config"]
         self.eraseTemplateConfigs = config
+        # load boards info
+        self.boardsInfo = {}
+        boardsInfoPath = "boards_info.json"
+        if os.path.exists(boardsInfoPath):
+            with open(boardsInfoPath) as f:
+                self.boardsInfo = json.load(f)
+        # convert language to local
+        boards = {}
+        for key in self.boardsInfo:
+            boards[self.boardsInfo[key]['lang'][current_lang]] = self.boardsInfo[key]['type']
+        self.boardsInfo = boards
 
     def setWindowSize(self, w=520, h=550):
         self.resize(w, h)
@@ -280,16 +291,8 @@ class MainWindow(QMainWindow):
         boardSettingsGroupBox.setLayout(boardSettingsLayout)
         self.boardLabel = QLabel(tr("Board"))
         self.boardCombobox = ComboBox()
-        self.boardCombobox.addItem(parameters.SipeedMaixDock)
-        self.boardCombobox.addItem(parameters.SipeedMaixBitMic)
-        self.boardCombobox.addItem(parameters.SipeedMaixBit)
-        self.boardCombobox.addItem(parameters.SipeedMaixduino)
-        self.boardCombobox.addItem(parameters.SipeedMaixGo)
-        self.boardCombobox.addItem(parameters.SipeedMaixGoD)
-        self.boardCombobox.addItem(parameters.M5StickV)
-        self.boardCombobox.addItem(parameters.KendryteKd233)
-        self.boardCombobox.addItem(parameters.kendryteTrainer)
-        self.boardCombobox.addItem(parameters.Auto)
+        for key in self.boardsInfo:
+            self.boardCombobox.addItem(key)
         self.burnPositionLabel = QLabel(tr("BurnTo"))
         self.burnPositionCombobox = ComboBox()
         self.burnPositionCombobox.addItem(tr("Flash"))
@@ -1077,7 +1080,7 @@ class MainWindow(QMainWindow):
 
     def programExitSaveParameters(self):
         paramObj = paremeters_save.ParametersToSave()
-        paramObj.board    = self.boardCombobox.currentText()
+        paramObj.board    = self.boardCombobox.currentIndex()
         paramObj.burnPosition = self.burnPositionCombobox.currentText()
         paramObj.baudRate = self.serailBaudrateCombobox.currentIndex()
         paramObj.skin = self.param.skin
@@ -1115,7 +1118,9 @@ class MainWindow(QMainWindow):
                 else:
                     self.fileSelectShow(None, path, addr, firmware, enable=enable, loadFirst = False)
                 count += 1
-        self.boardCombobox.setCurrentText(self.param.board)
+        if type(self.param.board) == str:
+            self.param.board = 0
+        self.boardCombobox.setCurrentIndex(self.param.board)
         self.burnPositionCombobox.setCurrentText(self.param.burnPosition)
         self.serailBaudrateCombobox.setCurrentIndex(self.param.baudRate)
         if self.param.slowMode:
@@ -1194,24 +1199,7 @@ class MainWindow(QMainWindow):
         color = False
         board = "dan"
         boardText = self.boardCombobox.currentText()
-        if boardText == parameters.SipeedMaixGo:
-            board = "goE"
-        elif boardText == parameters.SipeedMaixGoD:
-            board = "goD"
-        elif boardText == parameters.SipeedMaixduino:
-            board = "maixduino"
-        elif boardText == parameters.SipeedMaixBit:
-            board = "bit"
-        elif boardText == parameters.SipeedMaixBitMic:
-            board = "bit_mic"
-        elif boardText == parameters.KendryteKd233:
-            board = "kd233"
-        elif boardText == parameters.kendryteTrainer:
-            board = "trainer"
-        elif boardText == parameters.M5StickV:
-            board = "goE"
-        elif boardText == parameters.Auto:
-            board = None
+        board = self.boardsInfo[boardText]
 
         sram = False
         if self.burnPositionCombobox.currentText()==tr("SRAM") or \

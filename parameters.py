@@ -22,16 +22,7 @@ if sys.platform.startswith('linux') or sys.platform.startswith('darwin') or sys.
 else:
     configFilePath  = os.path.join(os.getcwd(), configFileName)
 
-SipeedMaixDock    = "Sipeed Maix Dock"
-SipeedMaixBitMic  = "Sipeed Maix Bit ( with Mic )"
-SipeedMaixBit     = "Sipeed Maix Bit (Old)"
-SipeedMaixGo      = "Sipeed Maix Go ( open-ec & new CMSIS-DAP )"
-SipeedMaixGoD     = "Sipeed Maix Go ( Old CMSIS-DAP )"
-SipeedMaixduino   = "Sipeed Maixduino"
-KendryteKd233     = "Kendryte KD233"
-kendryteTrainer   = "kendryte Trainer"
-M5StickV          = "M5StickV"
-Auto   = "Auto"
+
 
 # get data path
 pathDirList = sys.argv[0].replace("\\", "/").split("/")

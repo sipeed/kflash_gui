@@ -1,0 +1,93 @@
+{
+    "Auto": {
+        "lang": {
+            "en": "Auto",
+            "zh": "自动选择"
+        },
+        "type": null
+    },
+    "Sipeed Maix Dock": {
+        "lang": {
+            "en": "Sipeed Maix Dock",
+            "zh": "Sipeed Maix Dock"
+        },
+        "type": "dan"
+    },
+    "Sipeed Maix Bit ( with Mic )": {
+        "lang": {
+            "en": "Sipeed Maix Bit ( with Mic )",
+            "zh": "Sipeed Maix Bit ( 带麦克风 )"
+        },
+        "type": "bit_mic"
+    },
+    "Sipeed Maix Bit (No Mic)": {
+        "lang": {
+            "en": "Sipeed Maix Bit (No Mic)",
+            "zh": "Sipeed Maix Bit (无麦克风)"
+        },
+        "type": "bit"
+    },
+    "Sipeed Maixduino": {
+        "lang": {
+            "en": "Sipeed Maixduino",
+            "zh": "Sipeed Maixduino"
+        },
+        "type": "goE"
+    },
+    "Sipeed Maix Amigo": {
+        "lang": {
+            "en": "Sipeed Maix Amigo",
+            "zh": "Sipeed Maix Amigo"
+        },
+        "type": "goE"
+    },
+    "Sipeed Maix Cube": {
+        "lang": {
+            "en": "Sipeed Maix Cube",
+            "zh": "Sipeed Maix Cube"
+        },
+        "type": "goE"
+    },
+    "Sipeed Maix Go ( open-ec & new CMSIS-DAP )": {
+        "lang": {
+            "en": "Sipeed Maix Go ( open-ec & new CMSIS-DAP )",
+            "zh": "Sipeed Maix Go ( open-ec 或新 CMSIS-DAP )"
+        },
+        "type": "goE"
+    },
+    "Sipeed Maix Go ( Old CMSIS-DAP )": {
+        "lang": {
+            "en": "Sipeed Maix Go ( Old CMSIS-DAP )",
+            "zh": "Sipeed Maix Go ( 旧版 CMSIS-DAP )"
+        },
+        "type": "goD"
+    },
+    "Sipeed Maix Nano": {
+        "lang": {
+            "en": "Sipeed Maix Nano",
+            "zh": "Sipeed Maix Nano"
+        },
+        "type": "goE"
+    },
+    "M5StickV": {
+        "lang": {
+            "en": "M5StickV",
+            "zh": "M5StickV"
+        },
+        "type": "goE"
+    },
+    "Kendryte KD233": {
+        "lang": {
+            "en": "Kendryte KD233",
+            "zh": "Kendryte KD233"
+        },
+        "type": "kd233"
+    },
+    "kendryte Trainer": {
+        "lang": {
+            "en": "kendryte Trainer",
+            "zh": "kendryte Trainer"
+        },
+        "type": "trainer"
+    }
+}

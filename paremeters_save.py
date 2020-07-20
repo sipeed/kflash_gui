@@ -13,7 +13,7 @@ class ParametersToSave:
 
     def __init__(self):
         self.files = []       # [ (path, addr, firmware, enable), ...]
-        self.board    = parameters.SipeedMaixBit
+        self.board    = 0
         self.burnPosition = tr_en("Flash")
         self.baudRate = 2
         self.skin = 2
