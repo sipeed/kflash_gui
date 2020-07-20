@@ -141,6 +141,11 @@ QComboBox {
     min-height:35px;
 }
 
+
+QComboBox:disabled {
+    color:#b4b4b4;
+}
+
 QComboBox:editable {
     background: white;
 }
@@ -211,6 +216,7 @@ QGroupBox::title {
 QPushButton {
     font-family:Tahoma,Optima,"Trebuchet MS";
     border-radius: 5px;
+    border: 1px solid #1590f5;
     background-color: #0f88eb;
     min-width: 80px;
     height:40px;
@@ -218,7 +224,8 @@ QPushButton {
 }
 
 QPushButton:hover {
-    background-color: #ff7575;
+    border: 1px solid #ff7575;
+    background-color: #ff6161;
     border-radius: 5px;
     min-height:25px;
     color:white;
@@ -226,6 +233,9 @@ QPushButton:hover {
 QPushButton:pressed {
     background-color: #4946ff;
     color: white;
+}
+QPushButton:disabled {
+    color: #c7c7c7;
 }
 
 .redbutton {
@@ -296,6 +306,11 @@ QLineEdit {
     height: 40px;
 }
 
+
+QLineEdit:disabled {
+    color:#b4b4b4;
+}
+
 .qLineEditNormal {
     border: 1px solid #ff8585;
     border-radius: 5px;
@@ -344,3 +359,18 @@ QRadioButton::indicator::checked {
     border-radius:6px;
     background-color: #7777cc;
 }
+
+QProgressBar {
+    color: white;
+    border: none;
+    border-radius: 5px;
+    background-color: #b689ff;
+    text-align: center;
+    width: 20px;
+}
+
+QProgressBar::chunk {
+    border: none;
+    background-color: #10ac10;
+}
+

@@ -1,0 +1,23 @@
+{
+    "MaixPy FS": {
+        "lang": {
+            "en": "MaixPy FS",
+            "zh": "MaixPy 文件系统"
+        },
+        "config": ["0xD00000", "3", "MiB"]
+    },
+    "MF1 Board Config": {
+        "lang": {
+            "en": "MF1 Board Config",
+            "zh": "MF1 板级配置"
+        },
+        "config": ["0x7FF000", "4", "KiB"]
+    },
+    "MF1 Face Info": {
+        "lang": {
+            "en": "MF1 Face Info",
+            "zh": "MF1 人脸信息"
+        },
+        "config": ["0x800000", "64", "KiB"]
+    }
+}

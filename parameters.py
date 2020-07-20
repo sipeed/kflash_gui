@@ -23,8 +23,8 @@ else:
     configFilePath  = os.path.join(os.getcwd(), configFileName)
 
 SipeedMaixDock    = "Sipeed Maix Dock"
-SipeedMaixBit     = "Sipeed Maix Bit"
 SipeedMaixBitMic  = "Sipeed Maix Bit ( with Mic )"
+SipeedMaixBit     = "Sipeed Maix Bit (Old)"
 SipeedMaixGo      = "Sipeed Maix Go ( open-ec & new CMSIS-DAP )"
 SipeedMaixGoD     = "Sipeed Maix Go ( Old CMSIS-DAP )"
 SipeedMaixduino   = "Sipeed Maixduino"

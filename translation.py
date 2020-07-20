@@ -29,6 +29,10 @@ def setLanguage(language):
         if f.endswith(transFileName):
             current_lang = language
 
+def getCurrentLanguage():
+    global current_lang
+    return current_lang
+
 def tr(str):
     try:
         return lang_json_list[current_lang][str]
