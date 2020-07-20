@@ -110,5 +110,6 @@
     "No file selected": "没有文件被选中",
     "Can not select kfpkg and bin files at the time": "不能同时选择 kfpkg 和 bin 文件",
     "Only support one kfpkg file": "只支持一个 kfpkg 文件",
-    "Adress must align with 64KiB(0x10000)": "地址必须 64KiB(0x10000) 对齐"
+    "Adress must align with 4KiB(0x1000)": "地址必须 4KiB(0x1000) 对齐",
+    "Please select file": "请先选择文件"
 }

@@ -443,8 +443,8 @@ class MainWindow(QMainWindow):
             try:
                 addr = int(item[4].text(),16)
                 if enable:
-                    if addr%(0x10000) != 0: # 64KiB align
-                        return (None, tr("Adress must align with 64KiB(0x10000)"))
+                    if addr%(0x1000) != 0: # 4KiB align
+                        return (None, tr("Adress must align with 4KiB(0x1000)"))
             except Exception:
                 addr = 0
             if not enable:
@@ -464,6 +464,8 @@ class MainWindow(QMainWindow):
                 fileType = "bin"
                 prefix = item[6]
                 files.append( (path, addr, prefix, enable) )
+        if len(files) == 0:
+            return (None, tr("Please select file"))
         return (fileType, files)
 
     class KFPKG():
@@ -910,7 +912,7 @@ class MainWindow(QMainWindow):
         percent = current/float(total)*100
         hint = "<font color=%s>%s %s:</font>   <font color=%s> %.2f%%</font>   <font color=%s> %s</font>" %("#ff7575", tr("Downloading"), fileTypeStr, "#2985ff", percent, "#1aac2d", speedStr)
         self.progressHint.setText(hint)
-        self.progressbar.setValue(percent)
+        self.progressbar.setValue(int(percent))
     
     def updateProgressPrint(self, str):
         self.statusBarStauts.setText(str)
