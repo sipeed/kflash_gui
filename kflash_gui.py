@@ -470,7 +470,7 @@ class MainWindow(QMainWindow):
     def highlightFirmwarePath(self, item, firmware):
         if firmware:
             item[3].setProperty("class", "qLineEditHighlight")
-            item[4].setText("0x00000")
+            # item[4].setText("0x00000")
         else:
             item[3].setProperty("class", "qLineEditNormal")
         self.frameWidget.style().unpolish(item[3])
