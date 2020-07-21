@@ -6,7 +6,7 @@ import time
 
 versionMajor = 1
 versionMinor = 6
-versionDev   = 2
+versionDev   = 3
 
 date = "2020.07.21"
 
