@@ -17,6 +17,7 @@ class ComboBox(QComboBox):
         self.showPopup()
 
     def mousePressEvent(self, QMouseEvent):
-        self.clicked.emit()
+        # self.clicked.emit()
+        pass
 
 
