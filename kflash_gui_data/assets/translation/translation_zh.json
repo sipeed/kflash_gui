@@ -126,6 +126,7 @@
     "EraseHint": "选择擦除模式并设置地址和大小,点击擦除",
     "Erase Canceled": "擦除被取消",
     "Erase Canceling": "正在取消擦除",
+    "Preparing Erase": "正在准备擦除",
     "Load Template": "加载模板",
     "Load": "加载",
     "Load erase config file error": "加载擦除配置文件错误"

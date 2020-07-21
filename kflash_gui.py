@@ -495,7 +495,7 @@ class MainWindow(QMainWindow):
         if self.erasing:
             if self.erasingCanCancel:
                 hint = "<font color=%s>%s</font>" %("#ff0d0d", tr("Erase Canceling"))
-                self.progressHint.setText(hint)
+                self.eraseStatus.setText(hint)
                 self.kflash.kill()
                 return
             self.errorSignal.emit(tr("Busy"), tr("Busy"))
@@ -504,7 +504,6 @@ class MainWindow(QMainWindow):
         self.erasingCanCancel = True
         self.setEraseButton(True) # show cancel button
 
-        ispTime = 4
         isChipeErase = False
         if self.eraseModeCombobox.currentText() == tr("Chip erase"):
             isChipeErase = True
@@ -538,11 +537,11 @@ class MainWindow(QMainWindow):
                 self.errorSignal.emit(tr("Length error"), tr("Length error") + " (max 16MiB)")
                 self.erasing = False
                 return
-            eraseTimeEstimate = math.ceil(length/65536*0.2 + ispTime) # 0.16s~0.3s every block(64K), full chip ~50s, 0.07s every sector(4K)
+            eraseTimeEstimate = math.ceil(length/65536*0.2) # 0.16s~0.3s every block(64K), full chip ~50s, 0.07s every sector(4K)
         else: # full chip erase
             addr = 0
             length = "all"
-            eraseTimeEstimate = math.ceil(50 + ispTime) # 16MiB Flash full chip erase time
+            eraseTimeEstimate = math.ceil(50) # 16MiB Flash full chip erase time
             length_text = "16"
             unit = "MiB"
 
@@ -552,7 +551,7 @@ class MainWindow(QMainWindow):
             self.erasing = False
             return
         
-        self.eraseStatus.setText("<font color=%s>%s</font>" %("#ffffff", tr("Erase")+" {}{}, wait about {} S".format(length_text, unit, eraseTimeEstimate) ))
+        self.eraseStatus.setText("<font color=%s>%s</font>" %("#0eb40e", tr("Preparing Erase") ))
         eraseThread = threading.Thread(target=self.eraseProcess, args=(addr, length, config['dev'], config['baud'], config['board'], config['color'], config['slow']))
         eraseThread.setDaemon(True)
         eraseThread.start()
@@ -600,10 +599,13 @@ class MainWindow(QMainWindow):
     def updateEraseStatus(self, length_text, unit, timeEstimate):
         timeElapsed = 0
         while self.erasing:
+            if self.erasingCanCancel:
+                time.sleep(0.1)
+                continue
             timeLast = timeEstimate - timeElapsed
             if timeLast < 0:
                 timeLast = 0
-            msg = "<font color=%s>%s</font>" %("#ffffff", 
+            msg = "<font color=%s>%s</font>" %("#0eb40e", 
                     tr("Erase")+" {}{}, wait about {} S".format(length_text, unit, timeLast) )
             self.eraseStatusSignal.emit(msg)
             timeElapsed += 1
@@ -1131,6 +1133,10 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         try:
             self.programExitSaveParameters()
+            self.kflash.kill()
+            self.kflash.checkKillExit()
+        except Exception:
+            pass
         finally:
             event.accept()
 
