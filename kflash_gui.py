@@ -69,7 +69,7 @@ class MainWindow(QMainWindow):
         self.units = ["KiB", "B", "MiB"]
         # load erase template
         self.eraseTemplateConfigs = {}
-        eraseConfigPath = "erase_config.json"
+        eraseConfigPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kflash_gui_data", "erase_config.json")
         if os.path.exists(eraseConfigPath):
             with open(eraseConfigPath) as f:
                 self.eraseTemplateConfigs = json.load(f)
@@ -81,7 +81,7 @@ class MainWindow(QMainWindow):
         self.eraseTemplateConfigs = config
         # load boards info
         self.boardsInfo = {}
-        boardsInfoPath = "boards_info.json"
+        boardsInfoPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kflash_gui_data", "boards_info.json")
         if os.path.exists(boardsInfoPath):
             with open(boardsInfoPath) as f:
                 self.boardsInfo = json.load(f)
@@ -874,7 +874,7 @@ class MainWindow(QMainWindow):
         try:
             zip = zipfile.ZipFile(kfpkg, mode="r")
             zip.extract(listFileName, tempDir)
-            with open(tempDir+"/"+listFileName) as f:
+            with open(os.path.join(tempDir, listFileName)) as f:
                 info = json.load(f)
             filesInfo = {}
             for fileInfo in info["files"]:

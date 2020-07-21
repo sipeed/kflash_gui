@@ -27,10 +27,10 @@ QWidget {
 }
 #funcSelect {
     margin-right: 15px;
-    width: 40px;
+    width: 60px;
 }
 #funcSelect QAbstractItemView {
-    min-width:40px;
+    min-width:60px;
 }
 #menuItem {
     min-height:27px;

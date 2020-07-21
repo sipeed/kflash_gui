@@ -26,6 +26,14 @@ QWidget {
     padding: 10px, 10px, 20px, 10px;
 }
 
+#funcSelect {
+    margin-right: 15px;
+    width: 60px;
+}
+#funcSelect QAbstractItemView {
+    min-width:60px;
+}
+
 #menuItem {
     min-height:27px;
     height:27px;
