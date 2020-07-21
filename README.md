@@ -9,7 +9,7 @@ Cross platform GUI wrapper for [kflash.py](https://github.com/sipeed/kflash.py.g
 ## Features
 
 * Support `*.bin` and `*.kfpgk` file with file picker
-* Support development board select
+* Support development board select(And auto detect, you should select board manually if you want to use high speed mode)
 * Support select where the firmware burned to
 * Auto scan serial port support
 * Baudrate editable
@@ -17,10 +17,11 @@ Cross platform GUI wrapper for [kflash.py](https://github.com/sipeed/kflash.py.g
 * Support Chinese and English Language 
 * Download(/burn) progress and speed display
 * Cancel download support
-* Support merge bins to one bin file
+* Support merge bins to one bin file(Especially for factory flash burn usage)
 * Support convert kfpkg to one bin file
 * Support enbale bin file or not
 * Auto identify firmware file
+* Erase flash support(Full chip or partial erase)
 
 
 ## Screenshots
@@ -29,6 +30,7 @@ Cross platform GUI wrapper for [kflash.py](https://github.com/sipeed/kflash.py.g
 | -| -|
 | ![](kflash_gui_data/assets/screenshot_download.png) | ![](kflash_gui_data/assets/screenshot_download_en.png) |
 | ![](kflash_gui_data/assets/screenshot_en.png) | ![](kflash_gui_data/assets/screenshot_file.png) |
+| ![](kflash_gui_data/assets/erase.png) | ![](kflash_gui_data/assets/erase_zh.png)
 
 
 
@@ -95,7 +97,7 @@ Refer here: [blog.sipeed.com/p/390.html](http://blog.sipeed.com/p/390.html)
 ## 特性
 
 * 支持 `*.bin` 和 `*.kfpgk` 文件， 支持文件选择器选择
-* 支持开发板选择
+* 支持开发板选择(也支持自动选择, 要使用高速模式尽量手动选择)
 * 可选择程序烧录到 `Flash` 或者 `SRAM`
 * 自动检测电脑上的串口
 * 波特率可编辑
@@ -103,10 +105,11 @@ Refer here: [blog.sipeed.com/p/390.html](http://blog.sipeed.com/p/390.html)
 * 界面支持中英文切换
 * 支持烧录进度显示和烧录速度显示
 * 支持取消下载进程
-* 支持合并多个 bin 文件为一个 bin 文件
-* 支持把 kfpkg 文件转换为一个 bin 文件
+* 支持合并多个 bin 文件为一个 bin 文件 (工厂批量烧录 Flash 可使用此功能打包成 bin )
+* 支持把 kfpkg 文件转换为一个 bin 文件 (工厂批量烧录 Flash 可使用此功能打包成 bin )
 * 支持使能 bin 文件
 * 自动识别文件是不是固件
+* Flash 擦除 (支持 部分擦除 和 整片 擦除)
 
 ## 使用方法
 
