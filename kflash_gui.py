@@ -71,7 +71,7 @@ class MainWindow(QMainWindow):
         self.eraseTemplateConfigs = {}
         eraseConfigPath = os.path.join(self.DataPath, "erase_config.json")
         if os.path.exists(eraseConfigPath):
-            with open(eraseConfigPath) as f:
+            with open(eraseConfigPath, encoding='utf-8') as f:
                 self.eraseTemplateConfigs = json.load(f)
         # convert language to local
         config = {}
@@ -83,7 +83,7 @@ class MainWindow(QMainWindow):
         self.boardsInfo = {}
         boardsInfoPath = os.path.join(self.DataPath, "boards_info.json")
         if os.path.exists(boardsInfoPath):
-            with open(boardsInfoPath) as f:
+            with open(boardsInfoPath, encoding='utf-8') as f:
                 self.boardsInfo = json.load(f)
         # convert language to local
         boards = {}
