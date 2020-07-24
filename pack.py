@@ -16,13 +16,16 @@ elif sys.platform.startswith("darwin"):
 else:
     cmd = 'pyinstaller --add-binary="kflash_gui_data:kflash_gui_data" --add-binary="kflash_py:kflash_py" -i="kflash_gui_data/assets/logo.png" -w kflash_gui.py'
 
-os.system(cmd)
+result = os.system(cmd)
+
+if result != 0:
+    exit(1)
 
 if sys.platform.startswith("darwin"):
     if os.path.exists("./dist/kflash_gui.dmg"):
         os.remove("./dist/kflash_gui.dmg")
 
-    os.system("""create-dmg \
+    result = os.system("""create-dmg \
         --volname "KFlash GUI Installer" \
         --volicon "kflash_gui_data/assets/logo.icns" \
         --background "kflash_gui_data/assets/installer_background_mac.png" \
@@ -36,3 +39,5 @@ if sys.platform.startswith("darwin"):
         "./dist/kflash_gui.app"
     """)
 
+    if result != 0:
+        exit(1)
