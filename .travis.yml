@@ -41,6 +41,8 @@ deploy:
   file_glob: true
   file:
     - "./dist/*.dmg"
+    - "./dist/*.tar.xz"
+    - "./dist/*.7z"
   skip_cleanup: true
   on:
     branch: master
