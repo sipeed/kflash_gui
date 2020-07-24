@@ -52,5 +52,4 @@ deploy:
   cleanup: false
   prerelease: true
   on:
-    branch: master
     tags: true
