@@ -9,6 +9,7 @@ if os.path.exists("build"):
 if os.path.exists("dist"):
     shutil.rmtree("dist")
 
+# pyinstaller generate files
 if sys.platform.startswith("win32"):
     cmd = 'pyinstaller --add-binary="kflash_gui_data;kflash_gui_data" --add-binary="kflash_py;kflash_py" -i="kflash_gui_data/assets/logo.ico" -w kflash_gui.py'
 elif sys.platform.startswith("darwin"):
@@ -22,11 +23,13 @@ result = os.system(cmd)
 if result != 0:
     exit(1)
 
-if sys.platform.startswith("darwin"):
+# create packages
+if sys.platform.startswith("win32"):
+    pass
+elif sys.platform.startswith("darwin"):
     if os.path.exists("./dist/kflash_gui.dmg"):
         os.remove("./dist/kflash_gui.dmg")
-
-    result = os.system("""create-dmg \
+    cmd = """create-dmg \
         --volname "KFlash GUI Installer" \
         --volicon "kflash_gui_data/assets/logo.icns" \
         --background "kflash_gui_data/assets/installer_background_mac.png" \
@@ -38,7 +41,18 @@ if sys.platform.startswith("darwin"):
         --app-drop-link 600 185 \
         "./dist/kflash_gui.dmg" \
         "./dist/kflash_gui.app"
-    """)
+    """
+else:
+    if os.path.exists("./dist/kflash_gui.tar.xz"):
+        os.remove("./dist/kflash_gui.tar.xz")
+    cmd = """sh -c \
+        " \
+        cd ./dist || exit -1 ; \
+        XZ_OPT=-9 tar -Jcf kflash_gui.tar.xz kflash_gui || exit -1 ; \
+        " \
+    """
 
-    if result != 0:
-        exit(1)
+result = os.system(cmd)
+
+if result != 0:
+    exit(1)
