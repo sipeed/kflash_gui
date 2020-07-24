@@ -1,36 +1,33 @@
 notifications:
-    email: false
+  email: false
+language: python
 jobs:
-    include:
+  include:
     - os: osx
-        language: python
-        python: 3.8
-        sudo: required
+      python: 3.8
     - os: linux
-        language: python
-        python: 3.8
-        sudo: required
-        addons:
-            apt:
-                packages:
-                - x11-utils
-                - libxkbcommon-x11-0
-        services: xvfb
+      python: 3.8
+      addons:
+        apt:
+          packages:
+          - x11-utils
+          - libxkbcommon-x11-0
+      services: xvfb
 install:
-    - python --version
-    - pip install -e .
-    - pip freeze
+  - python --version
+  - pip install -e .
+  - pip freeze
 script:
-    - python pack.py
+  - python pack.py
 deploy:
-    provider: releases
-    overwrite: true
-    api_key:
-        secure: $SECURE_API_KEY
-    file_glob: true
-    file:
-        - "dist_app/*.dmg"
-    skip_cleanup: true
-    on:
-        branch: master
-        tags: true
+  provider: releases
+  overwrite: true
+  token:
+    secure: $SECURE_API_KEY
+  file_glob: true
+  file:
+    - "dist_app/*.dmg"
+  skip_cleanup: true
+  on:
+    branch: master
+    tags: true
