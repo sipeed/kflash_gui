@@ -54,3 +54,4 @@ deploy:
   prerelease: true
   on:
     tags: true
+  edge: true
