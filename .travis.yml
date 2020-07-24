@@ -4,9 +4,9 @@ language: python
 jobs:
   include:
     - os: osx
-      python: 3.8
+      python: 3.8.5
     - os: linux
-      python: 3.8
+      python: 3.8.5
       addons:
         apt:
           packages:
