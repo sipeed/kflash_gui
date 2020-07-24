@@ -1,0 +1,36 @@
+notifications:
+    email: false
+jobs:
+    include:
+    - os: osx
+        language: python
+        python: 3.8
+        sudo: required
+    - os: linux
+        language: python
+        python: 3.8
+        sudo: required
+        addons:
+            apt:
+                packages:
+                - x11-utils
+                - libxkbcommon-x11-0
+        services: xvfb
+install:
+    - python --version
+    - pip install -e .
+    - pip freeze
+script:
+    - python pack.py
+deploy:
+    provider: releases
+    overwrite: true
+    api_key:
+        secure: $SECURE_API_KEY
+    file_glob: true
+    file:
+        - "dist_app/*.dmg"
+    skip_cleanup: true
+    on:
+        branch: master
+        tags: true
