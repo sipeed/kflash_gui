@@ -21,7 +21,7 @@ os.system(cmd)
 if sys.platform.startswith("darwin"):
     if os.path.exists("./dist/kflash_gui.dmg"):
         os.remove("./dist/kflash_gui.dmg")
-        
+
     os.system("""create-dmg \
         --volname "KFlash GUI Installer" \
         --volicon "kflash_gui_data/assets/logo.icns" \
