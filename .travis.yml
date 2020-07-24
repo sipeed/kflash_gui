@@ -36,8 +36,8 @@ script:
 
 before_deploy:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then mv "dist/kflash_gui.tar.xz" "dist/kflash_gui_${TRAVIS_TAG}_linux.tar.xz" ; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then mv "dist/kflash_gui.dmg" "dist/kflash_gui_${TRAVIS_TAG}_macOS.dmg"  ; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then mv "dist/kflash_gui.7z" "dist/kflash_gui_${TRAVIS_TAG}_windows.7z ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then mv "dist/kflash_gui.dmg" "dist/kflash_gui_${TRAVIS_TAG}_macOS.dmg" ; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then mv "dist/kflash_gui.7z" "dist/kflash_gui_${TRAVIS_TAG}_windows.7z" ; fi
 
 deploy:
   provider: releases
