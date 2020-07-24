@@ -15,7 +15,7 @@ jobs:
       services: xvfb
 install:
   - python --version
-  - pip install -e .
+  - pip install -r requirements.txt
   - pip freeze
 script:
   - python pack.py
