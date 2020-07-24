@@ -38,6 +38,7 @@ before_deploy:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then mv "dist/kflash_gui.tar.xz" "dist/kflash_gui_${TRAVIS_TAG}_linux.tar.xz" ; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then mv "dist/kflash_gui.dmg" "dist/kflash_gui_${TRAVIS_TAG}_macOS.dmg" ; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then mv "dist/kflash_gui.7z" "dist/kflash_gui_${TRAVIS_TAG}_windows.7z" ; fi
+  - find dist
 
 deploy:
   provider: releases
@@ -46,9 +47,9 @@ deploy:
     secure: "f/cXevhUkauQ4Q0QlbvwLWrmh+fxxrkwsCRdaJw3zKmlsOoj4TAcajJNy3Y5tJ3wFLOoL8ZS2XcZKY165cLUSP17v2iuGFuDgWUoJR9bRHi3mTEiU21VtoHLIUmWRJJLbY8sO2OtIKvUbWeniT29b4/UDQrfC7Ng4+2pXI/eZ2SPOm+kqvjLtLVrGINBpnVo45e4pCQO/BCfxH3vbRMQAjFkXpOxO10pCD4+E0HSifE1LSMymoDYDQozg8TomEoZq3bSLww5Mod8q0Q+Z0LnpfLqepHpTwpW4SqKnQi2RKDzVrTI8zbPyA62zO4f5s1/z+cshOGusLHpI1isNJQnyDR6HmzjaukCHc/cv5M0VYd5GbBddR9dzF6DrAs1LjOVuCR9ZgXmJ5jQaV2xpaYVyLcIJsNelpIgUu3Ob6RRKR5T2WZgKZEu8kgWpAdKqvUVS+WDabKJWjxmWxar0GlkuIOKRW7mkMowE/P0Dtzw07UpfIFI6dFlv7cp3tQad9LN+tMs4ie+JflWbovz6a7RV5JOK8v8HRqawL3UmwLx7WNFTZiQnaXcFOCvtsZ3jmZUb00Q16vzUevyPxoBziG50BddMM41K6zSdIX8V+oUeYQwwRblS0GBgDbwKVK20kKWETWWzaqmG5LJndfYppPbuZOflRGh3GJE7KblRHefSAc="
   file_glob: true
   file:
-    - "./dist/*.dmg"
-    - "./dist/*.tar.xz"
-    - "./dist/*.7z"
+    - "dist/kflash_gui_${TRAVIS_TAG}_linux.tar.xz"
+    - "dist/kflash_gui_${TRAVIS_TAG}_macOS.dmg"
+    - "dist/kflash_gui_${TRAVIS_TAG}_windows.7z"
   cleanup: false
   prerelease: true
   on:
