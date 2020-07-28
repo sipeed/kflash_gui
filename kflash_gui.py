@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
     app = None
     firmware_start_bytes = [b'\x21\xa8', b'\xef\xbe', b'\xad\xde']
 
-    def __init__(self,app):
+    def __init__(self, app):
         super().__init__()
         self.app = app
         self.programStartGetSavedParameters()
@@ -187,6 +187,8 @@ class MainWindow(QMainWindow):
         downloadLayout = QVBoxLayout()
         self.downloadWidget.setProperty("class","downloadWidget")
         self.downloadWidget.setLayout(downloadLayout)
+        menuWidget = QWidget()
+        menuWidget.setLayout(menuLayout)
 
         mainWidget.setLayout(mainLayout)
         # menu
@@ -198,7 +200,7 @@ class MainWindow(QMainWindow):
         # download button
         # -----
         # status bar
-        self.frameLayout.addLayout(menuLayout)
+        self.frameLayout.addWidget(menuWidget)
         self.frameLayout.addWidget(mainWidget)
         self.frameLayout.addWidget(self.progressHint)
         self.frameLayout.addWidget(self.progressbarRootWidget)
@@ -214,12 +216,12 @@ class MainWindow(QMainWindow):
         self.FuncCombobox = ComboBox()
         self.FuncCombobox.addItem(tr("Firmware"))
         self.FuncCombobox.addItem(tr("Erase"))
-        self.langButton.setProperty("class", "menuItemLang")
-        self.skinButton.setProperty("class", "menuItem2")
-        self.aboutButton.setProperty("class", "menuItem3")
-        self.langButton.setObjectName("menuItem")
-        self.skinButton.setObjectName("menuItem")
-        self.aboutButton.setObjectName("menuItem")
+        self.langButton.setProperty("class", "menuItem")
+        self.skinButton.setProperty("class", "menuItem")
+        self.aboutButton.setProperty("class", "menuItem")
+        self.langButton.setObjectName("menuItemLang")
+        self.skinButton.setObjectName("menuItem2")
+        self.aboutButton.setObjectName("menuItem3")
         self.FuncCombobox.setObjectName("funcSelect")
         menuLayout.addWidget(self.langButton)
         menuLayout.addWidget(self.skinButton)
@@ -1152,15 +1154,23 @@ class MainWindow(QMainWindow):
         self.frameWidget.style().unpolish(self.downloadButton)
         self.frameWidget.style().polish(self.downloadButton)
         self.frameWidget.update()
-
+    
     def skinChange(self):
-        if self.param.skin == 1: # light
-            file = open(self.DataPath + '/assets/qss/style-dark.qss', "r")
-            self.param.skin = 2
-        else: # elif self.param.skin == 2: # dark
-            file = open(self.DataPath + '/assets/qss/style.qss', "r")
-            self.param.skin = 1
-        self.app.setStyleSheet(file.read().replace("$DataPath", self.DataPath))
+        self.skinShow(True)
+
+    def skinShow(self, change=False):
+        if change:
+            if self.param.skin == 1: # light
+                file = open(self.DataPath + '/assets/qss/style-dark.qss', "r")
+                self.param.skin = 2
+            else: # elif self.param.skin == 2: # dark
+                file = open(self.DataPath + '/assets/qss/style.qss', "r")
+                self.param.skin = 1
+        else:
+            name = "style" if self.param.skin == 1 else "style-dark"
+            file = open(self.DataPath + '/assets/qss/{}.qss'.format(name), "r")
+        qss = file.read().replace("$DataPath", self.DataPath)
+        self.app.setStyleSheet(qss)
         file.close()
 
     def showAbout(self):

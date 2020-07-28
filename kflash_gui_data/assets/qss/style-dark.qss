@@ -32,86 +32,61 @@ QWidget {
 #funcSelect QAbstractItemView {
     min-width:60px;
 }
-#menuItem {
-    min-height:27px;
-    height:27px;
-    min-width:27px;
-    width:27px;
+.menuItem {
+    min-height:32px;
+    min-width:32px;
+    max-width:32px;
+    max-height:32px;
     border-radius: 5px;
     margin-right:10px;
     background-color: #212121;
 }
-.menuItem1 {
-    min-height:27px;
-    height:27px;
-    min-width:27px;
-    width:27px;
+#menuItem1 {
+    min-height:32px;
+    height:32px;
+    min-width:32px;
+    width:32px;
     border-radius: 5px;
     margin-right:10px;
     border-image: url("$DataPath/assets/arrow-left.png")
 }
-.menuItem1:hover {
+#menuItem1:hover {
     border-image: url("$DataPath/assets/arrow-left-white.png")
 }
-.menuItem2 {
-    min-height:27px;
-    height:27px;
-    min-width:27px;
-    width:27px;
+#menuItem2 {
+    min-height:32px;
+    height:32px;
+    min-width:32px;
+    width:32px;
     border-radius: 5px;
     margin-right:10px;
     border-image: url("$DataPath/assets/skin.png")
 }
-.menuItem2:hover {
+#menuItem2:hover {
     border-image: url("$DataPath/assets/skin-white.png")
 }
-.menuItemLang {
-    min-height:27px;
-    height:27px;
-    min-width:27px;
-    width:27px;
+#menuItemLang {
+    min-height:32px;
+    height:32px;
+    min-width:32px;
+    width:32px;
     border-radius: 5px;
     margin-right:10px;
     border-image: url("$DataPath/assets/lang.png")
 }
-.menuItemLang:hover {
+#menuItemLang:hover {
     border-image: url("$DataPath/assets/lang-white.png")
 }
-.menuItem3 {
-    min-height:27px;
-    height:27px;
-    min-width:27px;
-    width:27px;
+#menuItem3 {
+    width: 32px;
+    height: 32px;
     border-radius: 5px;
     margin-right:10px;
+    background-color: #212121;
     border-image: url("$DataPath/assets/help.png")
 }
-.menuItem3:hover {
+#menuItem3:hover {
     border-image: url("$DataPath/assets/help-white.png")
-}
-.menuItem4 {
-    min-height:27px;
-    height:27px;
-    min-width:27px;
-    width:27px;
-    border-radius: 5px;
-    margin-right:10px;
-    border-image: url("$DataPath/assets/arrow-right.png")
-}
-.menuItem4:hover {
-    border-image: url("$DataPath/assets/arrow-right-white.png")
-}
-.menuItem5 {
-    min-height:27px;
-    height:27px;
-    min-width:27px;
-    width:27px;
-    border-radius: 5px;
-    margin-right:10px;
-    border-image: url("$DataPath/assets/wave.png")
-}
-.menuItem5:hover {
-    border-image: url("$DataPath/assets/wave-white.png")
 }
 
 .remove_file_selection {
