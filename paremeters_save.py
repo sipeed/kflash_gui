@@ -3,8 +3,11 @@ from translation import tr_en
 import json, os
 import locale
 
-lang = locale.getdefaultlocale()
-if lang[0].startswith("zh"):
+try:
+    lang = locale.getdefaultlocale()
+except Exception:
+    lang = ["en"]
+if lang[0] and lang[0].startswith("zh"):
     default_lang = translation.language_zh
 else:
     default_lang = translation.language_en
@@ -56,7 +59,7 @@ class ParametersToSave:
         try:
             with open(path, "r") as f:
                 data = json.load(f)
-        except Exception as e:
+        except Exception:
             return
         try:
             self.files = data["files"]

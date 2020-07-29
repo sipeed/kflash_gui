@@ -6,9 +6,9 @@ import time
 
 versionMajor = 1
 versionMinor = 6
-versionDev   = 4
+versionDev   = 5
 
-date = "2020.07.24"
+date = "2020.07.29"
 
 def strAbout():
     pathDirList = sys.argv[0].replace("\\", "/").split("/")
