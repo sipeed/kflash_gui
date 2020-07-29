@@ -4,9 +4,9 @@ notifications:
   email: false
 jobs:
   include:
-    - name: "Python 3.8.0 on Xenial Linux"
+    - name: "Python 3.7.0 on Xenial Linux"
       os: linux
-      python: 3.8           # this works for Linux but is ignored on macOS or Windows
+      python: 3.7           # this works for Linux but is ignored on macOS or Windows
       addons:
         apt:
           packages:
@@ -20,13 +20,13 @@ jobs:
         homebrew:
           packages:
           - create-dmg
-    - name: "Python 3.8.0 on Windows"
+    - name: "Python 3.7.0 on Windows"
       os: windows           # Windows 10.0.17134 N/A Build 17134
       language: shell       # 'language: python' is an error on Travis CI Windows
       before_install:
-        - choco install python --version 3.8.0
+        - choco install python --version 3.7.0
         - python -m pip install --upgrade pip
-      env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
+      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
 install:
   - pip3 install --upgrade pip
   - pip3 install -r requirements.txt
