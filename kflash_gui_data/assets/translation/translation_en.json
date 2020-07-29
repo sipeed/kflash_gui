@@ -90,7 +90,7 @@
     "Upgrade available, please download new release in release page": "Upgrade available, please download new release in release page",
     "slow mode tips": "Slow Mode: Download bootload slower but more stable<br>Fast Mode: Download bootloader faster but maybe unstable",
     "bin prefix tips": "MUST check it if firmware, or DO NOT check",
-    "help str":"-----------------------------------------<br><b>Firmware Download</b>:<br><b>-></b> Select firmware(support .kfpkg and .bin format)<br><b>-></b> Select Board and Burn to Flash<br><b>-></b> Select Serial and baudrate， if download fail, try low speed mode and check serial port setting, and try to decrease baudrate<br><br><b>Other files download</b>：<br>Similar to firmware download<br>-----------------------------------------",
+    "help str":"-----------------------------------------<br><b>Firmware Download</b>:<br><b>-></b> Select firmware(support .kfpkg and .bin format)<br><b>-></b> Select Board and Burn to Flash<br><b>-></b> Select Serial and baudrate， if download fail, try low speed mode and check serial port setting, and try to decrease baudrate, and use another Type-C cable try again<br><br><b>Other files download</b>：<br>Similar to firmware download<br>-----------------------------------------",
     "Merge hint": "merge bin files to one bin file, padding with 0xFF",
     "Adress must align with 4KiB(0x1000)": "Adress must align with 4KiB(0x1000)",
     "Please select file": "Please select file",
