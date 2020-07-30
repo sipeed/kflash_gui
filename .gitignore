@@ -109,3 +109,7 @@ kflash_gui.conf
 
 
 .DS_Store
+
+# special
+!dist_tool/appimage/app/usr/lib/
+

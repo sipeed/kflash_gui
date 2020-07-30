@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=kflash_gui
+Comment=burn tool with GUI for k210
+Exec=kflash_gui
+Icon=logo
+Categories=Development;
+Terminal=false
+StartupNotify=true
+MimeType=application/x-executable;
