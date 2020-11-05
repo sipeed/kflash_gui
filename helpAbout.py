@@ -11,6 +11,11 @@ versionDev   = 5
 date = "2020.07.29"
 
 def strAbout():
+    """
+    Generate a string representation of the path
+
+    Args:
+    """
     pathDirList = sys.argv[0].replace("\\", "/").split("/")
     pathDirList.pop()
     strPath = os.path.abspath("/".join(str(i) for i in pathDirList))

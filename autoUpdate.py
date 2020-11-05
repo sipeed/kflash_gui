@@ -10,6 +10,12 @@ except ImportError:
 class AutoUpdate:
     updateUrl = "https://github.com/Sipeed/kflash_gui/releases"
     def detectNewVersion(self):
+        """
+        Determine if the current page is available.
+
+        Args:
+            self: (todo): write your description
+        """
         try:
             page = urllib.request.urlopen(self.updateUrl)
             html_doc = page.read().decode()
@@ -28,5 +34,11 @@ class AutoUpdate:
         return False
 
     def OpenBrowser(self):
+        """
+        Opens the web browser.
+
+        Args:
+            self: (todo): write your description
+        """
         webbrowser.open(self.updateUrl, new=0, autoraise=True)
         return
