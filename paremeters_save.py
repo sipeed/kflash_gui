@@ -15,6 +15,12 @@ else:
 class ParametersToSave:
 
     def __init__(self):
+        """
+        Initialize the board
+
+        Args:
+            self: (todo): write your description
+        """
         self.files = []       # [ (path, addr, firmware, enable), ...]
         self.board    = 0
         self.burnPosition = tr_en("Flash")
@@ -25,9 +31,22 @@ class ParametersToSave:
 
 
     def __del__(self):
+        """
+        Remove a function from self.
+
+        Args:
+            self: (todo): write your description
+        """
         pass
     
     def save(self, path):
+        """
+        Saves the board to disk.
+
+        Args:
+            self: (todo): write your description
+            path: (str): write your description
+        """
         data = {}
         rm = []
         for f in self.files:
@@ -56,6 +75,13 @@ class ParametersToSave:
             pass
     
     def load(self, path):
+        """
+        Loads a json file
+
+        Args:
+            self: (todo): write your description
+            path: (str): write your description
+        """
         try:
             with open(path, "r") as f:
                 data = json.load(f)

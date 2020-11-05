@@ -23,6 +23,12 @@ if len(lang_json_list) == 0:
 
 
 def setLanguage(language):
+    """
+    Sets the language of the language
+
+    Args:
+        language: (str): write your description
+    """
     global current_lang
     transFileName = "translation_"+language+".json"
     for f in os.listdir(parameters.translationPathAbs):
@@ -30,10 +36,21 @@ def setLanguage(language):
             current_lang = language
 
 def getCurrentLanguage():
+    """
+    Get the current language.
+
+    Args:
+    """
     global current_lang
     return current_lang
 
 def tr(str):
+    """
+    Return a string representation of a string
+
+    Args:
+        str: (todo): write your description
+    """
     try:
         return lang_json_list[current_lang][str]
     except Exception:
@@ -43,9 +60,21 @@ def tr(str):
             return str
 
 def tr_en(str):
+    """
+    Truncated string for a string.
+
+    Args:
+        str: (todo): write your description
+    """
     return lang_json_list[language_en][str]
 
 def tr2(str):
+    """
+    Return a string of string
+
+    Args:
+        str: (todo): write your description
+    """
     ret = str
     key_find = None
     max_find_len = 0

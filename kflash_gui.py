@@ -27,6 +27,13 @@ from  kflash_py.kflash import KFlash
 
 class MyClass(object):
     def __init__(self, arg):
+        """
+        Initialize the class
+
+        Args:
+            self: (todo): write your description
+            arg: (todo): write your description
+        """
         super(MyClass, self).__init__()
         self.arg = arg
 
@@ -44,6 +51,13 @@ class MainWindow(QMainWindow):
     firmware_start_bytes = [b'\x21\xa8', b'\xef\xbe', b'\xad\xde']
 
     def __init__(self,app):
+        """
+        Flask application initialization.
+
+        Args:
+            self: (todo): write your description
+            app: (todo): write your description
+        """
         super().__init__()
         self.app = app
         self.programStartGetSavedParameters()
@@ -53,9 +67,21 @@ class MainWindow(QMainWindow):
         self.updateFrameParams()
 
     def __del__(self):
+        """
+        Remove a function from self.
+
+        Args:
+            self: (todo): write your description
+        """
         pass
 
     def initVar(self):
+        """
+        Initialize the configuration.
+
+        Args:
+            self: (todo): write your description
+        """
         self.burning = False
         self.erasing = False
         self.erasingCanCancel = True
@@ -92,9 +118,25 @@ class MainWindow(QMainWindow):
         self.boardsInfo = boards
 
     def setWindowSize(self, w=520, h=550):
+        """
+        Sets the width for this widget.
+
+        Args:
+            self: (todo): write your description
+            w: (todo): write your description
+            h: (todo): write your description
+        """
         self.resize(w, h)
 
     def setFileSelectItemLayout(self, item, isKfpkg):
+        """
+        Sets the combobox for the item. : parameter item | <int | <xfpkg >
+
+        Args:
+            self: (todo): write your description
+            item: (todo): write your description
+            isKfpkg: (todo): write your description
+        """
         if isKfpkg:
             item[4].hide()
             item[2].setStretch(0, 1)
@@ -110,6 +152,12 @@ class MainWindow(QMainWindow):
             item[2].setStretch(4, 1)
 
     def addFileSelectionItem(self):
+        """
+        Adds a new item to the list.
+
+        Args:
+            self: (todo): write your description
+        """
         enableCheckbox = QCheckBox()
         filePathWidget = QLineEdit()
         fileBurnAddrWidget = QLineEdit("0x00000")
@@ -146,6 +194,13 @@ class MainWindow(QMainWindow):
         return item
 
     def removeFileSelectionItem(self, item):
+        """
+        Removes the inputed item.
+
+        Args:
+            self: (todo): write your description
+            item: (str): write your description
+        """
         if self.packing:
             self.hintSignal.emit(tr("Busy"), tr("Please wait, packing ..."))
             return
@@ -161,6 +216,12 @@ class MainWindow(QMainWindow):
         self.setWindowSize(self.width())
 
     def initWindow(self):
+        """
+        Creates a new instance.
+
+        Args:
+            self: (todo): write your description
+        """
         QToolTip.setFont(QFont('SansSerif', 10))
         # main layout
         self.frameWidget = QWidget()
@@ -377,6 +438,12 @@ class MainWindow(QMainWindow):
         print("config file path:", parameters.configFilePath)
 
     def initEvent(self):
+        """
+        Connect to the device
+
+        Args:
+            self: (todo): write your description
+        """
         self.serialPortCombobox.clicked.connect(self.portComboboxClicked)
         self.errorSignal.connect(self.errorHint)
         self.hintSignal.connect(self.hint)
@@ -405,6 +472,13 @@ class MainWindow(QMainWindow):
         self.serialPortCombobox.currentIndexChanged.connect(slotLambda)
 
     def setFrameStrentch(self, mode):
+        """
+        Sets the frame mode.
+
+        Args:
+            self: (todo): write your description
+            mode: (str): write your description
+        """
         if mode == 0:
             self.frameLayout.setStretch(0,1)
             self.frameLayout.setStretch(1,3)
@@ -422,19 +496,44 @@ class MainWindow(QMainWindow):
     
     # @QtCore.pyqtSlot(str)
     def indexChanged_lambda(self, obj):
+        """
+        Index the current index in the editor.
+
+        Args:
+            self: (todo): write your description
+            obj: (todo): write your description
+        """
         mainObj = obj.arg
         self.serialPortCombobox.setToolTip(mainObj.serialPortCombobox.currentText())
 
     def portComboboxClicked(self):
+        """
+        DetectoboxPort.
+
+        Args:
+            self: (todo): write your description
+        """
         self.detectSerialPort()
 
     def MoveToCenter(self):
+        """
+        Reimplemented from qabstractframe.
+
+        Args:
+            self: (todo): write your description
+        """
         qr = self.frameGeometry()
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
     
     def changeFunc(self):
+        """
+        Prompts the current window.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.burning or self.packing or self.erasing:
             self.hintSignal.emit(tr("Busy"), tr("Busy"))
             return
@@ -446,6 +545,13 @@ class MainWindow(QMainWindow):
         self.setWindowSize()
     
     def funcSwitch(self, func):
+        """
+        Erases the current function.
+
+        Args:
+            self: (todo): write your description
+            func: (callable): write your description
+        """
         # erase mode
         if func == "Erase":
             self.fileSelectGroupBox.hide()
@@ -468,6 +574,14 @@ class MainWindow(QMainWindow):
             self.statusBarStauts.setText("<font color=%s>%s</font>" %("#1aac2d", tr("DownloadHint")))
 
     def highlightFirmwarePath(self, item, firmware):
+        """
+        Reimplemented color for the specified item.
+
+        Args:
+            self: (todo): write your description
+            item: (todo): write your description
+            firmware: (str): write your description
+        """
         if firmware:
             item[3].setProperty("class", "qLineEditHighlight")
             # item[4].setText("0x00000")
@@ -478,6 +592,12 @@ class MainWindow(QMainWindow):
         self.frameWidget.update()
 
     def eraseModechange(self):
+        """
+        Erase the current state of the edit.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.eraseModeCombobox.currentText() == tr("Chip erase"):
             self.eraseAddr.setText("0x00000")
             self.eraseLen.setText(tr("Full chip"))
@@ -492,6 +612,12 @@ class MainWindow(QMainWindow):
             self.eraseLenUnit.setDisabled(False)
 
     def erase(self):
+        """
+        Erase the current button.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.erasing:
             if self.erasingCanCancel:
                 hint = "<font color=%s>%s</font>" %("#ff0d0d", tr("Erase Canceling"))
@@ -560,6 +686,13 @@ class MainWindow(QMainWindow):
         eraseStatusThread.start()
     
     def setEraseButton(self, cancel):
+        """
+        Sets the behaviour for this widget. : param cancel | <int >
+
+        Args:
+            self: (todo): write your description
+            cancel: (todo): write your description
+        """
         self.eraseButton.setEnabled(True)
         if cancel:
             self.eraseButton.setText(tr("Cancel"))
@@ -575,9 +708,22 @@ class MainWindow(QMainWindow):
             self.eraseButton.update()
     
     def setEraseStatus(self, msg):
+        """
+        Sets the text for the button. : param msg : param msg | <int >
+
+        Args:
+            self: (todo): write your description
+            msg: (str): write your description
+        """
         self.eraseStatus.setText(msg)
     
     def eraseLoadConfig(self):
+        """
+        Erases the current configuration.
+
+        Args:
+            self: (todo): write your description
+        """
         configName = self.eraseLoadConfigCombobox.currentText()
         config = self.eraseTemplateConfigs
         if configName in config and config[configName][2] in self.units:
@@ -592,11 +738,30 @@ class MainWindow(QMainWindow):
             self.errorSignal.emit(tr("Error"), tr("Load erase config file error"))
 
     def onEraseProgress(self, fileTypeStr, current, total, speedStr):
+        """
+        Toggles whether or not this widget.
+
+        Args:
+            self: (todo): write your description
+            fileTypeStr: (str): write your description
+            current: (todo): write your description
+            total: (todo): write your description
+            speedStr: (str): write your description
+        """
         if current >= total:
             self.erasingCanCancel = False
             self.eraseButton.setDisabled(True)
 
     def updateEraseStatus(self, length_text, unit, timeEstimate):
+        """
+        Updates the text.
+
+        Args:
+            self: (todo): write your description
+            length_text: (int): write your description
+            unit: (str): write your description
+            timeEstimate: (todo): write your description
+        """
         timeElapsed = 0
         while self.erasing:
             if self.erasingCanCancel:
@@ -612,6 +777,19 @@ class MainWindow(QMainWindow):
             time.sleep(1)
 
     def eraseProcess(self, addr, length, dev, baud, board, color, slow):
+        """
+        !
+
+        Args:
+            self: (todo): write your description
+            addr: (todo): write your description
+            length: (int): write your description
+            dev: (todo): write your description
+            baud: (todo): write your description
+            board: (todo): write your description
+            color: (str): write your description
+            slow: (todo): write your description
+        """
         errMsg = ""
         success = True
         try:
@@ -626,6 +804,14 @@ class MainWindow(QMainWindow):
             self.eraseResultSignal.emit(False, errMsg)
 
     def eraseResult(self, success, msg):
+        """
+        Erase the notification.
+
+        Args:
+            self: (todo): write your description
+            success: (str): write your description
+            msg: (str): write your description
+        """
         if success:
             self.hintSignal.emit(tr("Success"), tr("Erase success"))
             self.erasing = False # set here for updateEraseStatus
@@ -643,6 +829,18 @@ class MainWindow(QMainWindow):
         self.setEraseButton(False)
 
     def fileSelectShow(self, item, name, addr=None, firmware=None, enable=True, loadFirst = False):
+        """
+        Updates the user inputed by file.
+
+        Args:
+            self: (todo): write your description
+            item: (todo): write your description
+            name: (str): write your description
+            addr: (str): write your description
+            firmware: (str): write your description
+            enable: (str): write your description
+            loadFirst: (todo): write your description
+        """
         isKfpkg = False
         if self.isKfpkg(name):
             isKfpkg = True 
@@ -696,6 +894,12 @@ class MainWindow(QMainWindow):
     #      or ("kfpkg", file path)
     #      or (None, msg)
     def getBurnFilesInfo(self):
+        """
+        Gets information about the file.
+
+        Args:
+            self: (todo): write your description
+        """
         files = []
         fileType = ""
         for item in self.fileSelectWidgets:
@@ -737,11 +941,26 @@ class MainWindow(QMainWindow):
 
     class KFPKG():
         def __init__(self):
+            """
+            Initialize the file.
+
+            Args:
+                self: (todo): write your description
+            """
             self.fileInfo = {"version": "0.1.0", "files": []}
             self.filePath = {}
             self.burnAddr = []
         
         def addFile(self, addr, path, prefix=False):
+            """
+            Add a file to the list.
+
+            Args:
+                self: (todo): write your description
+                addr: (str): write your description
+                path: (str): write your description
+                prefix: (str): write your description
+            """
             if not os.path.exists(path):
                 raise ValueError(tr("FilePathError"))
             if addr in self.burnAddr:
@@ -756,21 +975,55 @@ class MainWindow(QMainWindow):
             self.burnAddr.append(addr)
 
         def listDumps(self):
+            """
+            Serialize the kfpkg list to a json into json.
+
+            Args:
+                self: (todo): write your description
+            """
             kfpkg_json = json.dumps(self.fileInfo, indent=4)
             return kfpkg_json
 
         def listDump(self, path):
+            """
+            List all entries in a file.
+
+            Args:
+                self: (todo): write your description
+                path: (str): write your description
+            """
             with open(path, "w") as f:
                 f.write(json.dumps(self.fileInfo, indent=4))
 
         def listLoads(self, kfpkgJson):
+            """
+            Load kfpkg from kfpkg.
+
+            Args:
+                self: (todo): write your description
+                kfpkgJson: (str): write your description
+            """
             self.fileInfo = json.loads(kfpkgJson)
 
         def listLload(self, path):
+            """
+            List all json file.
+
+            Args:
+                self: (todo): write your description
+                path: (str): write your description
+            """
             with open(path) as f:
                 self.fileInfo = json.load(f)
 
         def save(self, path):
+            """
+            Save the zip file.
+
+            Args:
+                self: (todo): write your description
+                path: (str): write your description
+            """
             listName = os.path.join(tempfile.gettempdir(), "kflash_gui_tmp_list.json")
             self.listDump(listName)
             try:
@@ -785,6 +1038,14 @@ class MainWindow(QMainWindow):
             os.remove(listName)
 
     def checkFilesAddrValid(self, fileType, files):
+        """
+        Check the status of the files.
+
+        Args:
+            self: (todo): write your description
+            fileType: (str): write your description
+            files: (list): write your description
+        """
         if fileType == "bin":
             files.sort(key=lambda file:file[1])
             startAddr = -1
@@ -806,6 +1067,12 @@ class MainWindow(QMainWindow):
         return (True, "")
 
     def packFiles(self):
+        """
+        Emits the file
+
+        Args:
+            self: (todo): write your description
+        """
         if self.packing:
             self.hintSignal.emit(tr("Busy"), tr("Please wait, packing ..."))
             return
@@ -849,6 +1116,14 @@ class MainWindow(QMainWindow):
         t.start()
     
     def packFileProccess(self, files, fileSaveName):
+        """
+        Emits the file
+
+        Args:
+            self: (todo): write your description
+            files: (list): write your description
+            fileSaveName: (str): write your description
+        """
         # generate flash-list.json
         kfpkg = self.KFPKG()
         try:
@@ -871,6 +1146,13 @@ class MainWindow(QMainWindow):
         self.packing = False
 
     def getBurnFilesInfoFromKfpkg(self, kfpkg):
+        """
+        Gets kfpkg information from kfpkg
+
+        Args:
+            self: (todo): write your description
+            kfpkg: (todo): write your description
+        """
         tempDir = tempfile.gettempdir()
         listFileName = "flash-list.json"
         try:
@@ -893,6 +1175,12 @@ class MainWindow(QMainWindow):
         return (self.zipTempFiles,"")
 
     def cleanKfpkgTempFiles(self):
+        """
+        Remove all temporary zip files in the same.
+
+        Args:
+            self: (todo): write your description
+        """
         tempDir = tempfile.gettempdir()
         try:
             for file in self.zipTempFiles:
@@ -902,6 +1190,12 @@ class MainWindow(QMainWindow):
         self.zipTempFiles = []
 
     def mergeBin(self):
+        """
+        Merge the current settings.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.packing:
             self.hintSignal.emit(tr("Busy"), tr("Please wait, packing ..."))
             return
@@ -950,6 +1244,14 @@ class MainWindow(QMainWindow):
         t.start()
     
     def mergeBinProccess(self, files, fileSaveName):
+        """
+        Merge a merkfpkgs
+
+        Args:
+            self: (todo): write your description
+            files: (list): write your description
+            fileSaveName: (str): write your description
+        """
         self.updateProgressPrintSignal.emit(tr("Merging, please wait ..."))
         files.sort(key=lambda file:file[1])
         bin = b''
@@ -992,6 +1294,13 @@ class MainWindow(QMainWindow):
         self.cleanKfpkgTempFiles()
 
     def selectFile(self, item):
+        """
+        Prompts the user for the user.
+
+        Args:
+            self: (todo): write your description
+            item: (str): write your description
+        """
         if self.packing:
             self.hintSignal.emit(tr("Busy"), tr("Please wait, packing ..."))
             return
@@ -1014,20 +1323,54 @@ class MainWindow(QMainWindow):
         self.fileSelectShow(item, fileName_choose)
 
     def errorHint(self, title, str):
+        """
+        Print an error dialog
+
+        Args:
+            self: (todo): write your description
+            title: (str): write your description
+            str: (str): write your description
+        """
         QMessageBox.critical(self, title, str)
     
     def hint(self, title, str):
+        """
+        Prints the hint.
+
+        Args:
+            self: (todo): write your description
+            title: (str): write your description
+            str: (todo): write your description
+        """
         QMessageBox.information(self, title, str)
 
     def findSerialPort(self):
+        """
+        Return a list of this port.
+
+        Args:
+            self: (todo): write your description
+        """
         self.port_list = list(serial.tools.list_ports.comports())
         return self.port_list
 
     def portChanged(self):
+        """
+        Called when the serial port is changed
+
+        Args:
+            self: (todo): write your description
+        """
         self.serialPortCombobox.setCurrentIndex(0)
         self.serialPortCombobox.setToolTip(str(self.portList[0]))
 
     def detectSerialPort(self):
+        """
+        Detects all threads on port is on.
+
+        Args:
+            self: (todo): write your description
+        """
         if not self.isDetectSerialPort:
             self.isDetectSerialPort = True
             t = threading.Thread(target=self.detectSerialPortProcess)
@@ -1035,14 +1378,34 @@ class MainWindow(QMainWindow):
             t.start()
 
     def showCombobox(self):
+        """
+        Show the serialized display.
+
+        Args:
+            self: (todo): write your description
+        """
         self.serialPortCombobox.showPopup()
 
     def isKfpkg(self, name):
+        """
+        Return true if name is a package name.
+
+        Args:
+            self: (todo): write your description
+            name: (str): write your description
+        """
         if name.endswith(".kfpkg"):
             return True
         return False
     
     def isFileFirmware(self, name):
+        """
+        Returns true if the file is running.
+
+        Args:
+            self: (todo): write your description
+            name: (str): write your description
+        """
         isFirmware = False
         if not os.path.exists(name):
             return False
@@ -1057,11 +1420,24 @@ class MainWindow(QMainWindow):
         return isFirmware     
 
     def isFileValid(self, name):
+        """
+        Returns true if file exists.
+
+        Args:
+            self: (todo): write your description
+            name: (str): write your description
+        """
         if not os.path.exists(name):
             return False
         return True
 
     def detectSerialPortProcess(self):
+        """
+        Blocks until all serial ports have been displayed.
+
+        Args:
+            self: (todo): write your description
+        """
         while(1):
             portList = self.findSerialPort()
             if len(portList)>0:
@@ -1081,6 +1457,12 @@ class MainWindow(QMainWindow):
         self.isDetectSerialPort = False
 
     def programExitSaveParameters(self):
+        """
+        Stores the parameters
+
+        Args:
+            self: (todo): write your description
+        """
         paramObj = paremeters_save.ParametersToSave()
         paramObj.board    = self.boardCombobox.currentIndex()
         paramObj.burnPosition = self.burnPositionCombobox.currentText()
@@ -1102,12 +1484,24 @@ class MainWindow(QMainWindow):
         paramObj.save(parameters.configFilePath)
 
     def programStartGetSavedParameters(self):
+        """
+        Starts the program parameters
+
+        Args:
+            self: (todo): write your description
+        """
         paramObj = paremeters_save.ParametersToSave()
         paramObj.load(parameters.configFilePath)
         translation.setLanguage(paramObj.language)
         self.param = paramObj
 
     def updateFrameParams(self):
+        """
+        Updates parameters
+
+        Args:
+            self: (todo): write your description
+        """
         pathLen = len(self.param.files)
         if pathLen != 0:
             if len(self.param.files[0]) != 4: # [ (path, addr, prefix, enable), ...]
@@ -1131,6 +1525,13 @@ class MainWindow(QMainWindow):
             self.slowModeCombobox.setCurrentIndex(1)
 
     def closeEvent(self, event):
+        """
+        Closes the application.
+
+        Args:
+            self: (todo): write your description
+            event: (todo): write your description
+        """
         try:
             self.programExitSaveParameters()
             self.kflash.kill()
@@ -1141,6 +1542,12 @@ class MainWindow(QMainWindow):
             event.accept()
 
     def langChange(self):
+        """
+        Unpolates the language of the language
+
+        Args:
+            self: (todo): write your description
+        """
         if self.param.language == translation.language_en:
             translation.setLanguage(translation.language_zh)
             lang = tr("Chinese language")
@@ -1154,6 +1561,12 @@ class MainWindow(QMainWindow):
         self.frameWidget.update()
 
     def skinChange(self):
+        """
+        Writes the application
+
+        Args:
+            self: (todo): write your description
+        """
         if self.param.skin == 1: # light
             file = open(self.DataPath + '/assets/qss/style-dark.qss', "r")
             self.param.skin = 2
@@ -1164,21 +1577,49 @@ class MainWindow(QMainWindow):
         file.close()
 
     def showAbout(self):
+        """
+        Shows help message
+
+        Args:
+            self: (todo): write your description
+        """
         QMessageBox.information(self, tr("About"),"<h1 style='color:#f75a5a';margin=10px;>"+parameters.appName+
                                 '</h1><br><b style="color:#08c7a1;margin = 5px;">V'+str(helpAbout.versionMajor)+"."+
                                 str(helpAbout.versionMinor)+"."+str(helpAbout.versionDev)+
                                 "</b><br><br>"+helpAbout.date+"<br><br>"+tr("help str")+"<br><br>"+helpAbout.strAbout())
 
     def autoUpdateDetect(self):
+        """
+        Updates the auto auto - release.
+
+        Args:
+            self: (todo): write your description
+        """
         auto = autoUpdate.AutoUpdate()
         if auto.detectNewVersion():
             self.hintSignal.emit(tr("Upgrade"), tr("Upgrade available, please download new release in release page"))
             auto.OpenBrowser()
 
     def openDevManagement(self):
+        """
+        Opens the system.
+
+        Args:
+            self: (todo): write your description
+        """
         os.system('start devmgmt.msc')
 
     def updateProgress(self, fileTypeStr, current, total, speedStr):
+        """
+        Updates progress bar
+
+        Args:
+            self: (todo): write your description
+            fileTypeStr: (str): write your description
+            current: (todo): write your description
+            total: (int): write your description
+            speedStr: (str): write your description
+        """
         currBurnPos = self.burnPositionCombobox.currentText()
         if currBurnPos == tr("SRAM") or currBurnPos == tr_en("SRAM"):
             fileTypeStr = tr("ToSRAM")
@@ -1188,9 +1629,22 @@ class MainWindow(QMainWindow):
         self.progressbar.setValue(int(percent))
     
     def updateProgressPrint(self, str):
+        """
+        Updates the progress bar
+
+        Args:
+            self: (todo): write your description
+            str: (todo): write your description
+        """
         self.statusBarStauts.setText(str)
 
     def kflash_py_printCallback(self, *args, **kwargs):
+        """
+        Print msgflash message.
+
+        Args:
+            self: (todo): write your description
+        """
         # end = kwargs.pop('end', "\n")
         msg = ""
         for i in args:
@@ -1199,9 +1653,25 @@ class MainWindow(QMainWindow):
         self.updateProgressPrintSignal.emit(msg)
 
     def progress(self, fileTypeStr, current, total, speedStr):
+        """
+        Emits the progress bar.
+
+        Args:
+            self: (todo): write your description
+            fileTypeStr: (str): write your description
+            current: (todo): write your description
+            total: (int): write your description
+            speedStr: (todo): write your description
+        """
         self.updateProgressSignal.emit(fileTypeStr, current, total, speedStr)
 
     def getSerialSettings(self):
+        """
+        Returns the current settings.
+
+        Args:
+            self: (todo): write your description
+        """
         color = False
         board = "dan"
         boardText = self.boardCombobox.currentText()
@@ -1234,6 +1704,12 @@ class MainWindow(QMainWindow):
         },None, None)
 
     def download(self):
+        """
+        Downloads the progress bar.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.packing:
             self.hintSignal.emit(tr("Busy"), tr("Please wait, packing ..."))
             return
@@ -1282,6 +1758,21 @@ class MainWindow(QMainWindow):
         burnThread.start()
 
     def flashBurnProcess(self, dev, baud, board, sram, fileType, files, callback, color, slow):
+        """
+        Perform a board of the device.
+
+        Args:
+            self: (todo): write your description
+            dev: (todo): write your description
+            baud: (todo): write your description
+            board: (todo): write your description
+            sram: (todo): write your description
+            fileType: (str): write your description
+            files: (list): write your description
+            callback: (callable): write your description
+            color: (str): write your description
+            slow: (todo): write your description
+        """
         success = True
         errMsg = ""
         tmpFile = ""
@@ -1331,6 +1822,14 @@ class MainWindow(QMainWindow):
             
 
     def downloadResult(self, success, msg):
+        """
+        Emits the download.
+
+        Args:
+            self: (todo): write your description
+            success: (str): write your description
+            msg: (str): write your description
+        """
         if success:
             self.hintSignal.emit(tr("Success"), tr("DownloadSuccess"))
             self.statusBarStauts.setText("<font color=%s>%s</font>" %("#1aac2d", tr("DownloadSuccess")))
@@ -1354,12 +1853,23 @@ class MainWindow(QMainWindow):
         self.burning = False
 
     def terminateBurn(self):
+        """
+        Terminate the progress bar.
+
+        Args:
+            self: (todo): write your description
+        """
         hint = "<font color=%s>%s</font>" %("#ff0d0d", tr("DownloadCanceling"))
         self.progressHint.setText(hint)
         self.kflash.kill()
 
 
 def main():
+    """
+    Main function.
+
+    Args:
+    """
     app = QApplication(sys.argv)
     mainWindow = MainWindow(app)
     print("data path:"+mainWindow.DataPath)
