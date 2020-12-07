@@ -1,5 +1,5 @@
 bs4>=0.0.1
-PyQt5>=5.12.2
+PyQt5==5.12.2
 pyinstaller>=3.4
 pyserial>=3.4
 requests>=2.22.0
