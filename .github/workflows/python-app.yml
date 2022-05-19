@@ -45,11 +45,11 @@ jobs:
       - name: 'Before deploy'
         run: |
           if [ "${{ runner.os }}" == "Linux" ]; then
-            mv "dist/kflash_gui.tar.xz" "dist/kflash_gui_${{ github.ref_name }}_linux.tar.xz
+            mv "dist/kflash_gui.tar.xz" "dist/kflash_gui_${{ github.ref_name }}_linux.tar.xz"
           elif [ "${{ runner.os }}" == "macOS" ]; then
             mv "dist/kflash_gui.dmg" "dist/kflash_gui_${{ github.ref_name }}_macOS.dmg"
           elif [ "${{ runner.os }}" == "Windows" ]; then
-            mv "dist/kflash_gui.7z" "dist/kflash_gui_${{ github.ref_name }}_windows.7z
+            mv "dist/kflash_gui.7z" "dist/kflash_gui_${{ github.ref_name }}_windows.7z"
           else
             echo "${{ runner.os }} not supported"
             exit 1
