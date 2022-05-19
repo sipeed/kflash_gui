@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: read
+  id-token: read
 
 jobs:
   Build:
@@ -59,6 +60,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}"
           files: |
             dist/kflash_gui_${{ github.ref_name }}_linux.tar.xz
             dist/kflash_gui_${{ github.ref_name }}_macOS.dmg
