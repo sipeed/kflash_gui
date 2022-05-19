@@ -23,7 +23,7 @@ jobs:
       - name: 'Install Packages'
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
-            apt install x11-utils libxkbcommon-x11-0
+            sudo apt-get install -yq x11-utils libxkbcommon-x11-0
           elif [ "$RUNNER_OS" == "macOS" ]; then
             brew install create-dmg
           elif [ "$RUNNER_OS" == "Windows" ]; then
