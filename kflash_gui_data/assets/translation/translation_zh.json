@@ -129,5 +129,7 @@
     "Preparing Erase": "正在准备擦除",
     "Load Template": "加载模板",
     "Load": "加载",
-    "Load erase config file error": "加载擦除配置文件错误"
+    "Load erase config file error": "加载擦除配置文件错误",
+    "Address and length error": "地址和长度错误",
+    "Continue": "继续"
 }

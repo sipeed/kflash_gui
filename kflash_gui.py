@@ -503,7 +503,6 @@ class MainWindow(QMainWindow):
         self.erasing = True
         self.erasingCanCancel = True
         self.setEraseButton(True) # show cancel button
-
         isChipeErase = False
         if self.eraseModeCombobox.currentText() == tr("Chip erase"):
             isChipeErase = True
@@ -517,6 +516,7 @@ class MainWindow(QMainWindow):
             except Exception:
                 self.errorSignal.emit(tr("Address error"), tr("Address error"))
                 self.erasing = False
+                self.setEraseButton(False)
                 return
             try:
                 length_text = self.eraseLen.text()
@@ -532,11 +532,21 @@ class MainWindow(QMainWindow):
             except Exception:
                 self.errorSignal.emit(tr("Length error"), tr("Length error"))
                 self.erasing = False
+                self.setEraseButton(False)
+                return
+            if (addr ==0 and length == 0) or (addr != 0 and length == 0) or addr < 0 or length < 0:
+                self.errorSignal.emit(tr("Address and length error"), tr("Address and length error"))
+                self.erasing = False
+                self.setEraseButton(False)
                 return
             if addr + length > 16 * 1024 * 1024: # limit 16MiB
-                self.errorSignal.emit(tr("Length error"), tr("Length error") + " (max 16MiB)")
-                self.erasing = False
-                return
+                reply = QMessageBox.question(self, tr("Continue") + " ?",
+                                     f'{addr + length} > 16MiB, ' + tr("Continue") + " ?",
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                if reply != QMessageBox.Yes:
+                    self.erasing = False
+                    self.setEraseButton(False)
+                    return
             eraseTimeEstimate = math.ceil(length/65536*0.2) # 0.16s~0.3s every block(64K), full chip ~50s, 0.07s every sector(4K)
         else: # full chip erase
             addr = 0
@@ -549,6 +559,7 @@ class MainWindow(QMainWindow):
         if not config:
             self.errorSignal.emit(err, msg)
             self.erasing = False
+            self.setEraseButton(False)
             return
         
         self.eraseStatus.setText("<font color=%s>%s</font>" %("#0eb40e", tr("Preparing Erase") ))
