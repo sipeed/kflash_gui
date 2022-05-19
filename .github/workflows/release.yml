@@ -59,7 +59,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.CI_AUTH_TOKEN }}
         with:
           tag_name: ${{ github.ref_name }}
           release_name: Release ${{ github.ref_name }}
@@ -69,7 +69,7 @@ jobs:
           prerelease: false
       - uses: xresloader/upload-to-github-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CI_AUTH_TOKEN }}
         with:
           file: "dist/kflash_gui_${{ github.ref_name }}_linux.tar.xz;dist/kflash_gui_${{ github.ref_name }}_macOS.dmg;dist/kflash_gui_${{ github.ref_name }}_windows.7z"
           release_id: ${{ steps.create_release.outputs.id }}
