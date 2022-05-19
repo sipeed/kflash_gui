@@ -37,7 +37,7 @@ class MainWindow(QMainWindow):
     updateProgressPrintSignal = pyqtSignal(str)
     showSerialComboboxSignal = pyqtSignal()
     downloadResultSignal = pyqtSignal(bool, str)
-    eraseResultSignal = pyqtSignal(bool, str)
+    eraseResultSignal = pyqtSignal(bool, str, bool)
     eraseStatusSignal = pyqtSignal(str)
     DataPath = "./"
     app = None
@@ -503,6 +503,7 @@ class MainWindow(QMainWindow):
         self.erasing = True
         self.erasingCanCancel = True
         self.setEraseButton(True) # show cancel button
+        self.eraseResultSignal.emit(False, "", True)
         isChipeErase = False
         if self.eraseModeCombobox.currentText() == tr("Chip erase"):
             isChipeErase = True
@@ -632,11 +633,14 @@ class MainWindow(QMainWindow):
             if str(e) != "Burn SRAM OK":
                 success = False
         if success:
-            self.eraseResultSignal.emit(True, errMsg)
+            self.eraseResultSignal.emit(True, errMsg, False)
         else:
-            self.eraseResultSignal.emit(False, errMsg)
+            self.eraseResultSignal.emit(False, errMsg, False)
 
-    def eraseResult(self, success, msg):
+    def eraseResult(self, success, msg, clear):
+        if clear:
+            self.statusBarStauts.setText("")
+            return
         if success:
             self.hintSignal.emit(tr("Success"), tr("Erase success"))
             self.erasing = False # set here for updateEraseStatus
