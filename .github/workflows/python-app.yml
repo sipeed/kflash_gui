@@ -14,10 +14,25 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-18.04
+          - ubuntu-22.04
+          - macos-12
+          - windows-2022
         python-version:
           - '3.8'
     steps:
+      - name: 'Install Packages'
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            apt install x11-utils libxkbcommon-x11-0
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+            brew install create-dmg
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+            echo "Noting to install on windows"
+          else
+            echo "$RUNNER_OS not supported"
+            exit 1
+          fi
+        shell: bash
       - name: 'Set up Python ${{ matrix.python-version }}'
         uses: actions/setup-python@v3
         with:
@@ -27,4 +42,17 @@ jobs:
       - run: pip3 install -r requirements.txt
       - run: pip3 freeze
       - run: python3 pack.py || python pack.py
-
+      - name: 'Before deploy'
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            mv "dist/kflash_gui.tar.xz" "dist/kflash_gui_${{ github.ref_name }}_linux.tar.xz
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+            mv "dist/kflash_gui.dmg" "dist/kflash_gui_${{ github.ref_name }}_macOS.dmg"
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+            mv "dist/kflash_gui.7z" "dist/kflash_gui_${{ github.ref_name }}_windows.7z
+          else
+            echo "$RUNNER_OS not supported"
+            exit 1
+          fi
+          find dist
+        shell: bash
