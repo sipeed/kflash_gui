@@ -16,7 +16,7 @@ jobs:
         os:
           - ubuntu-22.04
           - macos-11
-          - windows-2022
+          - windows-2019
         python-version:
           - '3.8'
     steps:
