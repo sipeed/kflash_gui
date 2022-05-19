@@ -56,8 +56,7 @@ jobs:
           fi
           find dist
         shell: bash
-      - name: 'Deploy'
-        uses: xresloader/upload-to-github-release@v1
+      - uses: xresloader/upload-to-github-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with: "dist/kflash_gui_${{ github.ref_name }}_linux.tar.xz;dist/kflash_gui_${{ github.ref_name }}_macOS.dmg;dist/kflash_gui_${{ github.ref_name }}_windows.7z"
