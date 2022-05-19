@@ -1,0 +1,30 @@
+name: build and deploy
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+permissions:
+  contents: read
+
+jobs:
+  Build:
+    runs-on: '${{ matrix.os }}'
+    strategy:
+      matrix:
+        os:
+          - ubuntu-18.04
+        python-version:
+          - '3.8'
+    steps:
+      - name: 'Set up Python ${{ matrix.python-version }}'
+        uses: actions/setup-python@v3
+        with:
+          python-version: '${{ matrix.python-version }}'
+      - uses: actions/checkout@v3
+      - run: pip3 install --upgrade pip
+      - run: pip3 install -r requirements.txt
+      - run: pip3 freeze
+      - run: python3 pack.py || python pack.py
+
