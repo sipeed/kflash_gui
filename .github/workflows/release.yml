@@ -4,9 +4,7 @@ on:
     tags:
       - "*"
 
-permissions:
-  contents: read
-  id-token: read
+permissions: read-all
 
 jobs:
   Build:
