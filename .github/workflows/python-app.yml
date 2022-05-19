@@ -22,14 +22,14 @@ jobs:
     steps:
       - name: 'Install Packages'
         run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
+          if [ "${{ runner.os }}" == "Linux" ]; then
             sudo apt-get install -yq x11-utils libxkbcommon-x11-0
-          elif [ "$RUNNER_OS" == "macOS" ]; then
+          elif [ "${{ runner.os }}" == "macOS" ]; then
             brew install create-dmg
-          elif [ "$RUNNER_OS" == "Windows" ]; then
+          elif [ "${{ runner.os }}" == "Windows" ]; then
             echo "Noting to install on windows"
           else
-            echo "$RUNNER_OS not supported"
+            echo "${{ runner.os }} not supported"
             exit 1
           fi
         shell: bash
@@ -44,14 +44,14 @@ jobs:
       - run: python3 pack.py || python pack.py
       - name: 'Before deploy'
         run: |
-          if [ ${{ runner.os }} == "Linux" ]; then
+          if [ "${{ runner.os }}" == "Linux" ]; then
             mv "dist/kflash_gui.tar.xz" "dist/kflash_gui_${{ github.ref_name }}_linux.tar.xz
-          elif [ ${{ runner.os }} == "macOS" ]; then
+          elif [ "${{ runner.os }}" == "macOS" ]; then
             mv "dist/kflash_gui.dmg" "dist/kflash_gui_${{ github.ref_name }}_macOS.dmg"
-          elif [ ${{ runner.os }} == "Windows" ]; then
+          elif [ "${{ runner.os }}" == "Windows" ]; then
             mv "dist/kflash_gui.7z" "dist/kflash_gui_${{ github.ref_name }}_windows.7z
           else
-            echo ${{ runner.os }} not supported"
+            echo "${{ runner.os }} not supported"
             exit 1
           fi
           find dist
