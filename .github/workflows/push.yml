@@ -1,4 +1,4 @@
-name: build and deploy
+name: build test
 on:
   push:
     branches: [ master ]
@@ -38,6 +38,9 @@ jobs:
         with:
           python-version: '${{ matrix.python-version }}'
       - uses: actions/checkout@v3
+      - name: Get submodules
+        run: |
+          git submodule update --init --recursive
       - run: pip3 install --upgrade pip
       - run: pip3 install -r requirements.txt
       - run: pip3 freeze
