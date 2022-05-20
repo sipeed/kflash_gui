@@ -5,8 +5,8 @@ from translation import tr, tr_en
 import time
 
 versionMajor = 1
-versionMinor = 6
-versionDev   = 5
+versionMinor = 7
+versionDev   = 1
 
 date = "2020.07.29"
 
