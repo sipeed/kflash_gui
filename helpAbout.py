@@ -6,7 +6,7 @@ import time
 
 versionMajor = 1
 versionMinor = 7
-versionDev   = 4
+versionDev   = 5
 
 date = "2022.05.27"
 
