@@ -1,8 +1,8 @@
-backports.tempfile>=1.0
 bs4>=0.0.1
 pyelftools>=0.25
 pyinstaller>=3.4
 PyQt5>=5.15.6
 pyserial>=3.4
 requests>=2.22.0
+tinyaes>=1.0.3
 urllib3>=1.25.3
