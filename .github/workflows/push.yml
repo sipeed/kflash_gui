@@ -57,7 +57,8 @@ jobs:
             chmod +x "dist/AppDir/AppRun"
             chmod +x "dist/AppDir/usr/bin/kflash_gui"
             wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage && chmod +x linuxdeploy-x86_64.AppImage
-            pushd "dist" && ${{github.workspace}}/linuxdeploy-x86_64.AppImage --appdir "AppDir" --output appimage && popd || ls -l
+            pushd "dist" && ${{github.workspace}}/linuxdeploy-x86_64.AppImage --appdir "AppDir" --output appimage && popd
+            ls -l "dist"
             mv "dist/kflash_gui*.AppImage" "dist/kflash_gui_${{ github.ref_name }}_linux.AppImage"
           elif [ "${{ runner.os }}" == "macOS" ]; then
             mv "dist/kflash_gui.dmg" "dist/kflash_gui_${{ github.ref_name }}_macOS.dmg"
