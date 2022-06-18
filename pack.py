@@ -31,7 +31,7 @@ if sys.platform.startswith("win32"):
     cmd = """bash.exe -c \
         " \
         cd ./dist || exit -1 ; ls ; \
-        7z a "kflash_gui.7z" "kflash_gui" -bd -mx9 || exit -1 ; \
+        7z a "kflash_gui.7z" "kflash_gui.exe" -bd -mx9 || exit -1 ; \
         " \
     """
 elif sys.platform.startswith("darwin"):
