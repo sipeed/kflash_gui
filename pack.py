@@ -57,6 +57,7 @@ else:
     cmd = """sh -c \
         " \
         cd ./dist || exit -1 ; \
+        ls \
         XZ_OPT=-9 tar -Jcf kflash_gui.tar.xz kflash_gui || exit -1 ; \
         " \
     """

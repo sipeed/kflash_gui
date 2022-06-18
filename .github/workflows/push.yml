@@ -49,6 +49,16 @@ jobs:
         run: |
           if [ "${{ runner.os }}" == "Linux" ]; then
             mv "dist/kflash_gui.tar.xz" "dist/kflash_gui_${{ github.ref_name }}_linux.tar.xz"
+            mkdir -p "dist/AppDir/usr/bin"
+            cp -rf "dist/kflash_gui" "dist/AppDir/usr/bin/kflash_gui"
+            cp -rf "kflash_gui_data/assets/logo.png" "dist/AppDir/kflash_gui.png"
+            cp -rf "kflash_gui_data/application/kflash_gui.desktop" "dist/AppDir/kflash_gui.desktop"
+            cp -rf "kflash_gui_data/application/kflash_gui.sh" "dist/AppDir/AppRun"
+            chmod +x "dist/AppDir/AppRun"
+            chmod +x "dist/AppDir/usr/bin/kflash_gui"
+            wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage && chmod +x linuxdeploy-x86_64.AppImage
+            pushd "dist" && ${{github.workspace}}/linuxdeploy-x86_64.AppImage --appdir "AppDir" --output appimage && popd || ls -l
+            mv "dist/kflash_gui.AppImage" "dist/kflash_gui_${{ github.ref_name }}_linux.AppImage"
           elif [ "${{ runner.os }}" == "macOS" ]; then
             mv "dist/kflash_gui.dmg" "dist/kflash_gui_${{ github.ref_name }}_macOS.dmg"
           elif [ "${{ runner.os }}" == "Windows" ]; then
