@@ -31,6 +31,7 @@ dataPath = os.path.abspath("/".join(str(i) for i in pathDirList))
 if not os.path.exists(dataPath + "/" + strDataDirName):
     pathDirList.pop()
     dataPath = os.path.abspath("/".join(str(i) for i in pathDirList))
+dataPath = getattr(sys, '_MEIPASS', dataPath)
 dataPath = (dataPath + "/" + strDataDirName).replace("\\", "/")
 
 translationPathAbs = dataPath+"/"+translationPath
