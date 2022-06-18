@@ -51,11 +51,15 @@ jobs:
             mv "dist/kflash_gui.tar.xz" "dist/kflash_gui_${{ github.ref_name }}_linux.tar.xz"
             mkdir -p "dist/AppDir/usr/bin"
             cp -rf "dist/kflash_gui" "dist/AppDir/usr/bin/kflash_gui"
-            cp -rf "kflash_gui_data/assets/logo.png" "dist/AppDir/kflash_gui.png"
-            cp -rf "kflash_gui_data/application/kflash_gui.desktop" "dist/AppDir/kflash_gui.desktop"
-            cp -rf "kflash_gui_data/application/kflash_gui.sh" "dist/AppDir/AppRun"
-            chmod +x "dist/AppDir/AppRun"
-            chmod +x "dist/AppDir/usr/bin/kflash_gui"
+            mkdir -p "dist/AppDir/usr/share/icons/hicolor/128x128/apps"
+            cp -rf "kflash_gui_data/assets/logo.png" "dist/AppDir/usr/share/icons/hicolor/128x128/apps/kflash_gui.png"
+            mkdir -p "dist/AppDir/usr/share/applications"
+            cp -rf "kflash_gui_data/application/kflash_gui.desktop" "dist/AppDir/usr/share/applications/kflash_gui.desktop"
+            mkdir -p "dist/AppDir/lib/x86_64-linux-gnu"
+            cp -rf "/lib/x86_64-linux-gnu/libdl.so.2" "dist/AppDir/lib/x86_64-linux-gnu/libdl.so.2"
+            cp -rf "/lib/x86_64-linux-gnu/libz.so.1" "dist/AppDir/lib/x86_64-linux-gnu/libz.so.1"
+            cp -rf "/lib/x86_64-linux-gnu/libpthread.so.0" "dist/AppDir/lib/x86_64-linux-gnu/libpthread.so.0"
+            cp -rf "/lib/x86_64-linux-gnu/libc.so.6" "dist/AppDir/lib/x86_64-linux-gnu/libc.so.6"
             wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage && chmod +x linuxdeploy-x86_64.AppImage
             pushd "dist" && ${{github.workspace}}/linuxdeploy-x86_64.AppImage --appdir "AppDir" --output appimage && popd
             LD_LIBRARY_PATH='' find dist/AppDir -type f -exec ldd {} 2>&1 \; | grep '=>' | grep -v AppDir
