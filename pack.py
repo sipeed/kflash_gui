@@ -30,8 +30,7 @@ if sys.platform.startswith("win32"):
         os.remove("./dist/kflash_gui.7z")
     cmd = """bash.exe -c \
         " \
-        cd ./dist || exit -1 ; \
-        ls \
+        cd ./dist || exit -1 ; ls ; \
         7z a "kflash_gui.7z" "kflash_gui" -bd -mx9 || exit -1 ; \
         " \
     """
@@ -56,8 +55,7 @@ else:
         os.remove("./dist/kflash_gui.tar.xz")
     cmd = """sh -c \
         " \
-        cd ./dist || exit -1 ; \
-        ls \
+        cd ./dist || exit -1 ; ls ; \
         XZ_OPT=-9 tar -Jcf kflash_gui.tar.xz kflash_gui || exit -1 ; \
         " \
     """
