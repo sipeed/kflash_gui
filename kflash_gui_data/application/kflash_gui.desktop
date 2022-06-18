@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=kflash_gui
+Exec=kflash_gui %F
+Icon=kflash_gui
+Type=Application
+Categories=Utility;
