@@ -12,7 +12,7 @@ if os.path.exists("dist"):
 # pyinstaller generate files
 if sys.platform.startswith("win32"):
     # NOTE: Some stupid antivirus software will kill the generated exe by mistake
-    cmd = 'pyinstaller --onefile --key=stupidantivirus --add-binary="kflash_gui_data;kflash_gui_data" --add-binary="kflash_py;kflash_py" -i="kflash_gui_data/assets/logo.ico" -w kflash_gui.py'
+    cmd = 'pyinstaller --onefile --key=stupidantivirus --add-data="kflash_gui_data;kflash_gui_data" --add-binary="kflash_py;kflash_py" -i="kflash_gui_data/assets/logo.ico" -w kflash_gui.py'
 elif sys.platform.startswith("darwin"):
     # NOTE: must use --add-data under darwin, or you will get "Unknown Mach-O header" error
     cmd = 'pyinstaller --add-data="kflash_gui_data:kflash_gui_data" --add-data="kflash_py:kflash_py" -i="kflash_gui_data/assets/logo.icns" -w kflash_gui.py'
