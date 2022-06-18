@@ -305,7 +305,7 @@ class MainWindow(QMainWindow):
         # widgets serial settings
         serialSettingsGroupBox = QGroupBox(tr("SerialSettings"))
         serialSettingsLayout = QGridLayout()
-        serialPortLabek = QLabel(tr("SerialPort"))
+        serialPortLabel = QLabel(tr("SerialPort"))
         serailBaudrateLabel = QLabel(tr("SerialBaudrate"))
         slowModeLabel = QLabel(tr("Speed mode"))
         self.serialPortCombobox = ComboBox()
@@ -324,8 +324,8 @@ class MainWindow(QMainWindow):
         self.slowModeCombobox.addItem(tr("Fast mode"))
         slowModeLabel.setToolTip(tr("slow mode tips"))
         self.slowModeCombobox.setToolTip(tr("slow mode tips"))
-        
-        serialSettingsLayout.addWidget(serialPortLabek,0,0)
+
+        serialSettingsLayout.addWidget(serialPortLabel,0,0)
         serialSettingsLayout.addWidget(serailBaudrateLabel, 1, 0)
         serialSettingsLayout.addWidget(slowModeLabel, 2, 0)
         serialSettingsLayout.addWidget(self.serialPortCombobox, 0, 1)
@@ -333,6 +333,20 @@ class MainWindow(QMainWindow):
         serialSettingsLayout.addWidget(self.slowModeCombobox, 2, 1)
         serialSettingsGroupBox.setLayout(serialSettingsLayout)
         settingLayout.addWidget(serialSettingsGroupBox)
+
+        # widgets SPI flash settings
+        spiFlashSettingsGroupBox = QGroupBox(tr("SpiFlashSettings"))
+        spiFlashSettingsLayout = QGridLayout()
+        spiFlashIoModeLabel = QLabel(tr("IO mode"))
+        spiFlashIoModeLabel.setToolTip(tr("flash io mode tips"))
+        self.spiFlashIoModeCombobox = ComboBox()
+        self.spiFlashIoModeCombobox.addItem(tr("DIO mode"))
+        self.spiFlashIoModeCombobox.addItem(tr("QIO mode"))
+        self.spiFlashIoModeCombobox.setToolTip(tr("flash io mode tips"))
+        spiFlashSettingsLayout.addWidget(spiFlashIoModeLabel,0,0)
+        spiFlashSettingsLayout.addWidget(self.spiFlashIoModeCombobox, 0, 1)
+        spiFlashSettingsGroupBox.setLayout(spiFlashSettingsLayout)
+        settingLayout.addWidget(spiFlashSettingsGroupBox)
 
         # set stretch
         settingLayout.setStretch(0,1)
@@ -1114,6 +1128,12 @@ class MainWindow(QMainWindow):
             paramObj.slowMode = True
         else:
             paramObj.slowMode = False
+        
+        if self.spiFlashIoModeCombobox.currentIndex()==0:
+            paramObj.ioMode = "dio"
+        else:
+            paramObj.ioMode = "qio"
+
         paramObj.save(parameters.configFilePath)
 
     def programStartGetSavedParameters(self):
@@ -1144,6 +1164,11 @@ class MainWindow(QMainWindow):
             self.slowModeCombobox.setCurrentIndex(0)
         else:
             self.slowModeCombobox.setCurrentIndex(1)
+
+        if self.param.ioMode == 'dio':
+            self.spiFlashIoModeCombobox.setCurrentIndex(0)
+        else:
+            self.spiFlashIoModeCombobox.setCurrentIndex(1)
 
     def closeEvent(self, event):
         try:
@@ -1239,13 +1264,15 @@ class MainWindow(QMainWindow):
         if dev=="":
             return (None, tr("Error"), tr("PleaseSelectSerialPort"))
         slow = self.slowModeCombobox.currentIndex()==0
+        iomode = "dio" if self.spiFlashIoModeCombobox.currentIndex()==0 else "qio"
         return ({
             "color": color,
             "board": board,
             "sram": sram,
             "dev": dev,
             "slow": slow,
-            "baud": baud
+            "baud": baud,
+            "iomode": iomode
         },None, None)
 
     def download(self):
@@ -1292,11 +1319,11 @@ class MainWindow(QMainWindow):
         hint = "<font color=%s>%s</font>" %("#ff0d0d", tr("DownloadStart"))
         self.progressHint.setText(hint)
         # download
-        burnThread = threading.Thread(target=self.flashBurnProcess, args=(config['dev'], config['baud'], config['board'], config['sram'], fileType, filesInfo, self.progress, config['color'], config['slow']))
+        burnThread = threading.Thread(target=self.flashBurnProcess, args=(config['dev'], config['baud'], config['board'], config['sram'], fileType, filesInfo, self.progress, config['color'], config['slow'], config['iomode']))
         burnThread.setDaemon(True)
         burnThread.start()
 
-    def flashBurnProcess(self, dev, baud, board, sram, fileType, files, callback, color, slow):
+    def flashBurnProcess(self, dev, baud, board, sram, fileType, files, callback, color, slow, io_mode):
         success = True
         errMsg = ""
         tmpFile = ""
@@ -1328,7 +1355,7 @@ class MainWindow(QMainWindow):
                     success = False
         if success:
             try:
-                self.kflash.process(terminal=False, dev=dev, baudrate=baud, board=board, sram = sram, file=filename, callback=callback, noansi=not color, slow_mode=slow)
+                self.kflash.process(terminal=False, dev=dev, baudrate=baud, board=board, sram = sram, file=filename, callback=callback, noansi=not color, slow_mode=slow, io_mode=io_mode)
             except Exception as e:
                 errMsg = tr2(str(e))
                 if str(e) != "Burn SRAM OK":

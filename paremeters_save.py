@@ -22,6 +22,7 @@ class ParametersToSave:
         self.skin = 2
         self.language = default_lang
         self.slowMode = True
+        self.ioMode = "dio"
 
 
     def __del__(self):
@@ -41,6 +42,7 @@ class ParametersToSave:
         data["skin"] = self.skin
         data["language"] = self.language
         data["slow_mode"] = self.slowMode
+        data["io_mode"] = self.ioMode
 
         dir_path = os.path.dirname(os.path.realpath(path))
         try:
@@ -68,6 +70,7 @@ class ParametersToSave:
             self.skin = data["skin"]
             self.language = data["language"]
             self.slowMode = data["slow_mode"]
+            self.ioMode = data["io_mode"]
         except Exception:
             pass
 

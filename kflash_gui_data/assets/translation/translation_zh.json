@@ -131,5 +131,10 @@
     "Load": "加载",
     "Load erase config file error": "加载擦除配置文件错误",
     "Address and length error": "地址和长度错误",
-    "Continue": "继续"
+    "Continue": "继续",
+    "SpiFlashSettings": "SPI Flash 设置",
+    "IO mode": "IO 模式",
+    "flash io mode tips" : "通常 DIO 模式具有更好的兼容性，<br>而 QIO 模式具有更快的速度。<br>如果你发现你的k210无法启动，<br>你可以试试DIO模式",
+    "DIO mode": "DIO 模式",
+    "QIO mode": "QIO 模式"
 }

@@ -94,5 +94,10 @@
     "Merge hint": "merge bin files to one bin file, padding with 0xFF",
     "Adress must align with 4KiB(0x1000)": "Adress must align with 4KiB(0x1000)",
     "Please select file": "Please select file",
-    "EraseHint": "Select erase mode and set addr and length, click erase button"
+    "EraseHint": "Select erase mode and set addr and length, click erase button",
+    "SpiFlashSettings": "SPI Flash Settings",
+    "IO mode": "IO mode",
+    "flash io mode tips" : "Usually DIO mode has better compatibility <br>and QIO mode has faster speed. <br>If you find that your k210 cannot boot, <br>you can try DIO mode",
+    "DIO mode": "DIO mode",
+    "QIO mode": "QIO mode"
 }
