@@ -76,5 +76,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             dist/kflash_gui_${{ github.ref_name }}_linux.tar.xz
+            dist/kflash_gui_${{ github.ref_name }}_linux.AppImage
             dist/kflash_gui_${{ github.ref_name }}_macOS.dmg
             dist/kflash_gui_${{ github.ref_name }}_windows.7z
