@@ -1,0 +1,81 @@
+name: build and release centos7
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build_centos:
+    # GitHub Actions does not currently support CentOS as an official platform, so in order to
+    # test on this OS we need to run it as a container based on the Ubuntu environment
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        container: ["centos:7"]
+
+    container:
+      image: ${{ matrix.container }}
+
+    steps:
+      - name: Install Development Tools
+        run: |
+          yum update -y
+          yum install -y sudo
+          yum groupinstall -y "Development Tools"
+          yum install -y gtk3 libXext libXrender libXtst libX11 libXau libXcursor libXdmcp libXfixes libXi libXmu libXp libXpm libXt python3 git
+      - uses: actions/checkout@v3
+      - name: Get submodules
+        run: |
+          git submodule update --init --recursive
+      - name: Install requirements
+        run: |
+          python3 -m venv venv
+          . venv/bin/activate
+          make pythondeps
+          python -c "import setuptools; print(setuptools.__version__)"
+          pip3 --version
+          pip3 install --upgrade pip
+          pip3 install -r requirements.txt
+          pip3 freeze
+          python3 pack.py || python pack.py
+      - name: 'Before deploy'
+        run: |
+          if [ "${{ runner.os }}" == "Linux" ]; then
+            export GLIBC_VER=$(ldd --version | grep ldd | awk '{ print $NF }')
+            mv "dist/kflash_gui.tar.xz" "dist/kflash_gui_${{ github.ref_name }}_linux_glibc${GLIBC_VER}.tar.xz"
+            mkdir -p "dist/AppDir/usr/bin"
+            cp -rf "dist/kflash_gui" "dist/AppDir/usr/bin/kflash_gui"
+            mkdir -p "dist/AppDir/usr/share/icons/hicolor/128x128/apps"
+            cp -rf "kflash_gui_data/assets/logo.png" "dist/AppDir/usr/share/icons/hicolor/128x128/apps/kflash_gui.png"
+            mkdir -p "dist/AppDir/usr/share/applications"
+            cp -rf "kflash_gui_data/application/kflash_gui.desktop" "dist/AppDir/usr/share/applications/kflash_gui.desktop"
+            wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage && chmod +x linuxdeploy-x86_64.AppImage
+            pushd "dist" && ${{github.workspace}}/linuxdeploy-x86_64.AppImage --appdir "AppDir" --output appimage && popd
+            LD_LIBRARY_PATH='' find dist/AppDir -type f -exec ldd {} 2>&1 \; | grep '=>' | grep -v AppDir
+            ls -l "dist"
+            mv dist/*.AppImage "dist/kflash_gui_${{ github.ref_name }}_linux_glibc${GLIBC_VER}.AppImage"
+          elif [ "${{ runner.os }}" == "macOS" ]; then
+            mv "dist/kflash_gui.dmg" "dist/kflash_gui_${{ github.ref_name }}_macOS.dmg"
+          elif [ "${{ runner.os }}" == "Windows" ]; then
+            mv "dist/kflash_gui.7z" "dist/kflash_gui_${{ github.ref_name }}_windows.7z"
+          else
+            echo "${{ runner.os }} not supported"
+            exit 1
+          fi
+          find dist
+        shell: bash
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            dist/kflash_gui_${{ github.ref_name }}_linux_*.tar.xz
+            dist/kflash_gui_${{ github.ref_name }}_linux_*.AppImage
+            dist/kflash_gui_${{ github.ref_name }}_macOS.dmg
+            dist/kflash_gui_${{ github.ref_name }}_windows.7z
