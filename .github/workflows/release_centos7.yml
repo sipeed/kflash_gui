@@ -29,6 +29,7 @@ jobs:
           yum install -y sudo
           yum groupinstall -y "Development Tools"
           yum install -y gtk3 libXext libXrender libXtst libX11 libXau libXcursor libXdmcp libXfixes libXi libXmu libXp libXpm libXt python3
+          yum remove -y git
           yum install -y git236
       - uses: actions/checkout@v3
         with:
@@ -78,5 +79,4 @@ jobs:
           files: |
             dist/kflash_gui_${{ github.ref_name }}_linux_*.tar.xz
             dist/kflash_gui_${{ github.ref_name }}_linux_*.AppImage
-            dist/kflash_gui_${{ github.ref_name }}_macOS.dmg
-            dist/kflash_gui_${{ github.ref_name }}_windows.7z
+
