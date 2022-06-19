@@ -40,6 +40,8 @@ jobs:
           . venv/bin/activate
           python -c "import setuptools; print(setuptools.__version__)"
           pip3 --version
+          cat requirements.txt | tr '>' ' ' | tr '=' ' ' | awk '{print $1}' > requirements.new.txt
+          mv requirements.new.txt requirements.txt
           pip3 install --upgrade pip
           pip3 install -r requirements.txt
           pip3 freeze
