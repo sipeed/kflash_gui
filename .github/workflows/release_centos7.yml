@@ -24,10 +24,12 @@ jobs:
     steps:
       - name: Install Development Tools
         run: |
+          yum install https://repo.ius.io/ius-release-el7.rpm https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
           yum update -y
           yum install -y sudo
           yum groupinstall -y "Development Tools"
-          yum install -y gtk3 libXext libXrender libXtst libX11 libXau libXcursor libXdmcp libXfixes libXi libXmu libXp libXpm libXt python3 git
+          yum install -y gtk3 libXext libXrender libXtst libX11 libXau libXcursor libXdmcp libXfixes libXi libXmu libXp libXpm libXt python3
+          yum install -y git236
       - uses: actions/checkout@v3
         with:
           submodules: recursive
