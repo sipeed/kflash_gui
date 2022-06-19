@@ -38,7 +38,6 @@ jobs:
         run: |
           python3 -m venv venv
           . venv/bin/activate
-          make pythondeps
           python -c "import setuptools; print(setuptools.__version__)"
           pip3 --version
           pip3 install --upgrade pip
