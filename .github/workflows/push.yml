@@ -56,7 +56,7 @@ jobs:
             mkdir -p "dist/AppDir/usr/share/applications"
             cp -rf "kflash_gui_data/application/kflash_gui.desktop" "dist/AppDir/usr/share/applications/kflash_gui.desktop"
             wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage && chmod +x linuxdeploy-x86_64.AppImage
-            pushd "dist" && ../linuxdeploy-x86_64.AppImage --appdir "AppDir" --output appimage && popd
+            pushd "dist" && ../linuxdeploy-x86_64.AppImage --appimage-extract-and-run --appdir "AppDir" --output appimage && popd
             LD_LIBRARY_PATH='' find dist/AppDir -type f -exec ldd {} 2>&1 \; | grep '=>' | grep -v AppDir
             ls -l "dist"
             mv dist/*.AppImage "dist/kflash_gui_${{ github.ref_name }}_linux_glibc${GLIBC_VER}.AppImage"
