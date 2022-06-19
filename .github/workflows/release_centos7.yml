@@ -29,9 +29,8 @@ jobs:
           yum groupinstall -y "Development Tools"
           yum install -y gtk3 libXext libXrender libXtst libX11 libXau libXcursor libXdmcp libXfixes libXi libXmu libXp libXpm libXt python3 git
       - uses: actions/checkout@v3
-      - name: Get submodules
-        run: |
-          git submodule update --init --recursive
+        with:
+          submodules: recursive
       - name: Install requirements
         run: |
           python3 -m venv venv
