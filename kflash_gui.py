@@ -766,7 +766,7 @@ class MainWindow(QMainWindow):
 
     class KFPKG():
         def __init__(self):
-            self.fileInfo = {"version": "0.1.0", "files": []}
+            self.fileInfo = {"": "0.1.0", "files": []}
             self.filePath = {}
             self.burnAddr = []
         
