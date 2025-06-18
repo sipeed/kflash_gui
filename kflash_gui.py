@@ -10,12 +10,13 @@ from Combobox import ComboBox
 import json, zipfile, struct, hashlib
 
 # from COMTool.wave import Wave
-from PyQt5.QtCore import pyqtSignal,Qt
-from PyQt5.QtWidgets import (QApplication, QWidget,QToolTip,QPushButton,QMessageBox,QDesktopWidget,QMainWindow,
-                             QVBoxLayout,QHBoxLayout,QGridLayout,QLabel,
-                             QLineEdit,QGroupBox,QSplitter,QFileDialog,QCheckBox,
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import (QApplication, QWidget, QToolTip, QPushButton, QMessageBox, QMainWindow,
+                             QVBoxLayout, QHBoxLayout, QGridLayout, QLabel,
+                             QLineEdit, QGroupBox, QFileDialog, QCheckBox,
                              QProgressBar)
-from PyQt5.QtGui import QIcon,QFont,QTextCursor,QPixmap
+from PyQt6.QtGui import QIcon, QFont, QPixmap
+
 import serial
 import serial.tools.list_ports
 import threading
@@ -381,7 +382,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(parameters.appName+" V"+str(helpAbout.versionMajor)+"."+str(helpAbout.versionMinor))
         icon = QIcon()
         print("icon path:"+self.DataPath+"/"+parameters.appIcon)
-        icon.addPixmap(QPixmap(self.DataPath+"/"+parameters.appIcon), QIcon.Normal, QIcon.Off)
+        icon.addPixmap(QPixmap(self.DataPath+"/"+parameters.appIcon), QIcon.Mode.Normal, QIcon.State.Off)
         self.setWindowIcon(icon)
         if sys.platform == "win32":
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(parameters.appName)
@@ -444,10 +445,11 @@ class MainWindow(QMainWindow):
 
     def MoveToCenter(self):
         qr = self.frameGeometry()
-        cp = QDesktopWidget().availableGeometry().center()
+        screen = QApplication.primaryScreen()
+        cp = screen.availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
-    
+
     def changeFunc(self):
         if self.burning or self.packing or self.erasing:
             self.hintSignal.emit(tr("Busy"), tr("Busy"))
@@ -579,10 +581,10 @@ class MainWindow(QMainWindow):
         
         self.eraseStatus.setText("<font color=%s>%s</font>" %("#0eb40e", tr("Preparing Erase") ))
         eraseThread = threading.Thread(target=self.eraseProcess, args=(addr, length, config['dev'], config['baud'], config['board'], config['color'], config['slow']))
-        eraseThread.setDaemon(True)
+        eraseThread.daemon = True
         eraseThread.start()
         eraseStatusThread = threading.Thread(target=self.updateEraseStatus, args=(length_text, unit, eraseTimeEstimate))
-        eraseStatusThread.setDaemon(True)
+        eraseStatusThread.daemon = True
         eraseStatusThread.start()
     
     def setEraseButton(self, cancel):
@@ -874,7 +876,7 @@ class MainWindow(QMainWindow):
 
         # pack and save
         t = threading.Thread(target=self.packFileProccess, args=(files, fileName_choose,))
-        t.setDaemon(True)
+        t.daemon = True
         t.start()
     
     def packFileProccess(self, files, fileSaveName):
@@ -975,7 +977,7 @@ class MainWindow(QMainWindow):
 
         # pack and save
         t = threading.Thread(target=self.mergeBinProccess, args=(files, fileName_choose,))
-        t.setDaemon(True)
+        t.daemon = True
         t.start()
     
     def mergeBinProccess(self, files, fileSaveName):
@@ -1060,7 +1062,7 @@ class MainWindow(QMainWindow):
         if not self.isDetectSerialPort:
             self.isDetectSerialPort = True
             t = threading.Thread(target=self.detectSerialPortProcess)
-            t.setDaemon(True)
+            t.daemon = True
             t.start()
 
     def showCombobox(self):
@@ -1320,7 +1322,7 @@ class MainWindow(QMainWindow):
         self.progressHint.setText(hint)
         # download
         burnThread = threading.Thread(target=self.flashBurnProcess, args=(config['dev'], config['baud'], config['board'], config['sram'], fileType, filesInfo, self.progress, config['color'], config['slow'], config['iomode']))
-        burnThread.setDaemon(True)
+        burnThread.daemon = True
         burnThread.start()
 
     def flashBurnProcess(self, dev, baud, board, sram, fileType, files, callback, color, slow, io_mode):
@@ -1415,10 +1417,9 @@ def main():
     app.setStyleSheet(qss)
     mainWindow.detectSerialPort()
     t = threading.Thread(target=mainWindow.autoUpdateDetect)
-    t.setDaemon(True)
+    t.daemon = True
     t.start()
-    sys.exit(app.exec_())
-
+    sys.exit(app.exec())
 if __name__ == '__main__':
     main()
 
