@@ -7,7 +7,7 @@ Cross platform GUI wrapper for [kflash.py](https://github.com/sipeed/kflash.py.g
 
 ## Features
 
-* Support `*.bin` and `*.kfpgk` file with file picker
+* Support `*.bin` and `*.kfpkg` file with file picker
 * Support development board select(And auto detect, you should select board manually if you want to use high speed mode)
 * Support select where the firmware burned to
 * Auto scan serial port support
@@ -99,7 +99,7 @@ Refer here: [blog.sipeed.com/p/390.html](http://blog.sipeed.com/p/390.html)
 
 ## 特性
 
-* 支持 `*.bin` 和 `*.kfpgk` 文件， 支持文件选择器选择
+* 支持 `*.bin` 和 `*.kfpkg` 文件， 支持文件选择器选择
 * 支持开发板选择(也支持自动选择, 要使用高速模式尽量手动选择)
 * 可选择程序烧录到 `Flash` 或者 `SRAM`
 * 自动检测电脑上的串口
