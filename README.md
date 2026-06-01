@@ -1,5 +1,4 @@
 # kflash_gui
-=============
 
 Cross platform GUI wrapper for [kflash.py](https://github.com/sipeed/kflash.py.git) (download(/burn) tool for k210)
 
@@ -13,7 +12,7 @@ Cross platform GUI wrapper for [kflash.py](https://github.com/sipeed/kflash.py.g
 * Auto scan serial port support
 * Baudrate editable
 * White skin and night skin support
-* Support Chinese and English Language 
+* Support Chinese and English Language
 * Download(/burn) progress and speed display
 * Cancel download support
 * Support merge bins to one bin file(Especially for factory flash burn usage)
@@ -24,15 +23,15 @@ Cross platform GUI wrapper for [kflash.py](https://github.com/sipeed/kflash.py.g
 
 ## Screenshots
 
-| ![](kflash_gui_data/assets/screenshot_1.png) | ![](kflash_gui_data/assets/screenshot_2.png) |
-| -| -|
-| ![](kflash_gui_data/assets/screenshot_download.png) | ![](kflash_gui_data/assets/screenshot_download_en.png) |
-| ![](kflash_gui_data/assets/screenshot_en.png) | ![](kflash_gui_data/assets/screenshot_file.png) |
-| ![](kflash_gui_data/assets/erase.png) | ![](kflash_gui_data/assets/erase_zh.png)
+| ![main window](kflash_gui_data/assets/screenshot_1.png) | ![settings](kflash_gui_data/assets/screenshot_2.png) |
+| --- | --- |
+| ![download](kflash_gui_data/assets/screenshot_download.png) | ![download English](kflash_gui_data/assets/screenshot_download_en.png) |
+| ![main window English](kflash_gui_data/assets/screenshot_en.png) | ![file picker](kflash_gui_data/assets/screenshot_file.png) |
+| ![erase](kflash_gui_data/assets/erase.png) | ![erase Chinese](kflash_gui_data/assets/erase_zh.png) |
 
 ## Usage
 
-* Download bin file (`kflash_gui_v*.*`)  [here](https://github.com/sipeed/kflash_gui/releases)
+* Download the bin file (`kflash_gui_v*.*`) from the [releases page](https://github.com/sipeed/kflash_gui/releases)
 
 * Compress and double click `kflash_gui.exe` or `kflash_gui`
 
@@ -149,11 +148,3 @@ sudo apt-get install -yq x11-utils libxkbcommon-x11-0 libfuse2
 ## 如何手动打包 `kfpkg`
 
 参考这里: [blog.sipeed.com/p/390.html](http://blog.sipeed.com/p/390.html)
-
-
-
-
-
-
-
-
