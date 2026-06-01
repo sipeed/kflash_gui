@@ -1,7 +1,7 @@
 bs4>=0.0.1
 pyelftools>=0.28
 pyinstaller>=5.1
-PyQt5>=5.15.7
+PyQt6>=6.8.0
 pyserial>=3.5
 requests>=2.28.0
 tinyaes>=1.0.3
