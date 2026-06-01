@@ -1,0 +1,5 @@
+{
+  // Bilingual README with long URLs and prose; do not hard-wrap at 80.
+  "default": true,
+  "MD013": false
+}
