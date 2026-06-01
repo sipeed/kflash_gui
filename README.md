@@ -73,6 +73,18 @@ sudo pip3 install pyinstaller
 python3 pack.py
 ```
 
+### Raspberry Pi / ARM
+
+There is no prebuilt ARM release: the official PyQt6 arm64 wheels
+require glibc 2.39, which is newer than current Raspberry Pi OS. Run
+from source with the distro's Qt6 package instead of the PyQt6 wheel:
+
+```bash
+sudo apt install python3 python3-pip python3-pyqt6
+pip3 install bs4 pyelftools pyserial requests tinyaes
+python3 kflash_gui.py
+```
+
 ## If something goes wrong
 
 ### If downloading fails
