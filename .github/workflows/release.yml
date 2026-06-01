@@ -3,82 +3,133 @@ on:
   push:
     tags:
       - "*"
+  workflow_dispatch:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
-  Build:
-    runs-on: '${{ matrix.os }}'
-    strategy:
-      matrix:
-        os:
-          - ubuntu-18.04
-          - ubuntu-20.04
-          - ubuntu-22.04
-          - macos-11
-          - windows-2019
-        python-version:
-          - '3.8'
+  build-linux:
+    runs-on: ubuntu-latest
+    container:
+      image: almalinux:8
     steps:
-      - name: 'Install Packages'
+      - name: Install dependencies
         run: |
-          if [ "${{ runner.os }}" == "Linux" ]; then
-            sudo apt-get install -yq x11-utils libxkbcommon-x11-0 libfuse2
-          elif [ "${{ runner.os }}" == "macOS" ]; then
-            brew install create-dmg
-          elif [ "${{ runner.os }}" == "Windows" ]; then
-            echo "Noting to install on windows"
-          else
-            echo "${{ runner.os }} not supported"
-            exit 1
-          fi
-        shell: bash
-      - name: 'Set up Python ${{ matrix.python-version }}'
-        uses: actions/setup-python@v3
-        with:
-          python-version: '${{ matrix.python-version }}'
-      - uses: actions/checkout@v3
+          dnf install -y dnf-plugins-core epel-release
+          dnf config-manager --set-enabled powertools
+          dnf install -y \
+            file \
+            fontconfig \
+            freetype \
+            git \
+            mesa-libEGL \
+            mesa-libGL \
+            python39 \
+            python39-pip \
+            tar \
+            wget \
+            which \
+            xcb-util \
+            xcb-util-cursor \
+            xcb-util-image \
+            xcb-util-keysyms \
+            xcb-util-renderutil \
+            xcb-util-wm \
+            xz
+          git config --global --add safe.directory '*'
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - run: pip3 install --upgrade pip
-      - run: pip3 install -r requirements.txt
-      - run: pip3 freeze
-      - run: python3 pack.py || python pack.py
-      - name: 'Before deploy'
+      - name: Build with PyInstaller
         run: |
-          if [ "${{ runner.os }}" == "Linux" ]; then
-            export GLIBC_VER=$(ldd --version | grep ldd | awk '{ print $NF }')
-            mv "dist/kflash_gui.tar.xz" "dist/kflash_gui_${{ github.ref_name }}_linux_glibc${GLIBC_VER}.tar.xz"
-            mkdir -p "dist/AppDir/usr/bin"
-            cp -rf "dist/kflash_gui" "dist/AppDir/usr/bin/kflash_gui"
-            mkdir -p "dist/AppDir/usr/share/icons/hicolor/128x128/apps"
-            cp -rf "kflash_gui_data/assets/logo.png" "dist/AppDir/usr/share/icons/hicolor/128x128/apps/kflash_gui.png"
-            mkdir -p "dist/AppDir/usr/share/applications"
-            cp -rf "kflash_gui_data/application/kflash_gui.desktop" "dist/AppDir/usr/share/applications/kflash_gui.desktop"
-            wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage && chmod +x linuxdeploy-x86_64.AppImage
-            pushd "dist" && ../linuxdeploy-x86_64.AppImage --appimage-extract-and-run --appdir "AppDir" --output appimage && popd
-            LD_LIBRARY_PATH='' find dist/AppDir -type f -exec ldd {} 2>&1 \; | grep '=>' | grep -v AppDir
-            ls -l "dist"
-            mv dist/*.AppImage "dist/kflash_gui_${{ github.ref_name }}_linux_glibc${GLIBC_VER}.AppImage"
-          elif [ "${{ runner.os }}" == "macOS" ]; then
-            mv "dist/kflash_gui.dmg" "dist/kflash_gui_${{ github.ref_name }}_macOS.dmg"
-          elif [ "${{ runner.os }}" == "Windows" ]; then
-            mv "dist/kflash_gui.7z" "dist/kflash_gui_${{ github.ref_name }}_windows.7z"
-          else
-            echo "${{ runner.os }} not supported"
-            exit 1
-          fi
-          find dist
-        shell: bash
+          python3.9 -m pip install --upgrade pip
+          # only-binary: on glibc 2.28 pip must not fall back to a newer
+          # PyQt6 sdist (unbuildable here); pin it to the newest wheel.
+          python3.9 -m pip install --only-binary=:all: -r requirements.txt
+          python3.9 -m pip freeze
+          python3.9 pack.py
+      - name: Package tar.xz and AppImage
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+        run: |
+          GLIBC_VER=$(ldd --version | head -1 | awk '{ print $NF }')
+          mv "dist/kflash_gui.tar.xz" \
+            "dist/kflash_gui_${GITHUB_REF_NAME}_linux_glibc${GLIBC_VER}.tar.xz"
+          mkdir -p dist/AppDir/usr/bin
+          cp -rf dist/kflash_gui dist/AppDir/usr/bin/kflash_gui
+          mkdir -p dist/AppDir/usr/share/icons/hicolor/128x128/apps
+          cp -rf kflash_gui_data/assets/logo.png \
+            dist/AppDir/usr/share/icons/hicolor/128x128/apps/kflash_gui.png
+          mkdir -p dist/AppDir/usr/share/applications
+          cp -rf kflash_gui_data/application/kflash_gui.desktop \
+            dist/AppDir/usr/share/applications/kflash_gui.desktop
+          wget -q "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
+          chmod +x linuxdeploy-x86_64.AppImage
+          pushd dist
+          ../linuxdeploy-x86_64.AppImage --appimage-extract-and-run \
+            --appdir AppDir --output appimage
+          popd
+          mv dist/*.AppImage \
+            "dist/kflash_gui_${GITHUB_REF_NAME}_linux_glibc${GLIBC_VER}.AppImage"
+          ls -l dist
       - name: Release
-        uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           files: |
-            dist/kflash_gui_${{ github.ref_name }}_linux_*.tar.xz
-            dist/kflash_gui_${{ github.ref_name }}_linux_*.AppImage
-            dist/kflash_gui_${{ github.ref_name }}_macOS.dmg
-            dist/kflash_gui_${{ github.ref_name }}_windows.7z
+            dist/kflash_gui_*_linux_*.tar.xz
+            dist/kflash_gui_*_linux_*.AppImage
+
+  build-macos:
+    runs-on: macos-15
+    steps:
+      - name: Install tools
+        run: brew install create-dmg
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Build with PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip freeze
+          python pack.py
+      - name: Package dmg
+        run: |
+          mv "dist/kflash_gui.dmg" "dist/kflash_gui_${GITHUB_REF_NAME}_macOS.dmg"
+          ls -l dist
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/kflash_gui_*_macOS.dmg
+
+  build-windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Build with PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip freeze
+          python pack.py
+      - name: Package 7z
+        shell: bash
+        run: |
+          mv "dist/kflash_gui.7z" "dist/kflash_gui_${GITHUB_REF_NAME}_windows.7z"
+          ls -l dist
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/kflash_gui_*_windows.7z
